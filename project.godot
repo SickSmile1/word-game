@@ -28,6 +28,7 @@ Settings="*res://scripts/autoload/SettingsManager.gd"
 Audio="*res://scripts/autoload/AudioManager.gd"
 WordDict="*res://scripts/autoload/WordDictionary.gd"
 SaveManager="*res://scripts/autoload/SaveManager.gd"
+Net="*res://scripts/net/NetworkManager.gd"
 
 [display]
 
