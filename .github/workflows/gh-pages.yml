@@ -29,10 +29,15 @@ jobs:
           use_preset_export_path: true
           presets_to_export: Web
           cache: true
+      - name: Stage site files at root
+        shell: bash
+        run: |
+          mkdir -p site
+          cp -r "${{ steps.export.outputs.build_directory }}"/*/* site/
       - uses: actions/configure-pages@v6
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: ${{ steps.export.outputs.build_directory }}
+          path: site
       - name: Deploy to Pages
         uses: actions/deploy-pages@v5
