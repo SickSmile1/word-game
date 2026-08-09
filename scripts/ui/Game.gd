@@ -1,8 +1,10 @@
 extends Control
 
-enum GameState { DIFFICULTY_SELECT, HUMAN_TURN, AI_THINKING, GAME_OVER }
+enum GameState { DIFFICULTY_SELECT, HUMAN_TURN, AI_THINKING, WAITING, GAME_OVER }
 
 const Board = preload("res://scripts/game/Board.gd")
+const GameOnline = preload("res://scripts/ui/GameOnline.gd")
+const GameSession = preload("res://scripts/game/GameSession.gd")
 const Tiles = preload("res://scripts/game/Tiles.gd")
 const TileRack = preload("res://scripts/game/TileRack.gd")
 const TileBag = preload("res://scripts/game/TileBag.gd")
@@ -29,6 +31,10 @@ var _exchange_mode: bool = false
 var _save_slot: int = -1
 var _preview_valid_cache: bool = false
 var _preview_dirty: bool = true
+var _online_mode: bool = false
+var _my_turn: bool = false
+var _bag_count: int = 0
+var _online: GameOnline
 
 @onready var difficulty_panel: Panel = %DifficultyPanel
 @onready var easy_button: Button = %EasyButton
@@ -60,6 +66,15 @@ func _ready():
 	_style_scene_theme(Settings.dark_mode)
 	get_viewport().size_changed.connect(_relayout)
 	_relayout()
+
+	if Net.active:
+		_online_mode = true
+		difficulty_panel.visible = false
+		game_ui.visible = true
+		game_overlay.visible = false
+		_online = GameOnline.new(self)
+		_online.setup()
+		return
 
 	if SaveManager.pending_load_slot >= 0:
 		var slot = SaveManager.pending_load_slot
@@ -234,6 +249,7 @@ func _start_game():
 
 func _start_human_turn():
 	_state = GameState.HUMAN_TURN
+	_my_turn = true
 	_reset_turn_state()
 	rack_display.set_exchange_mode(false)
 	rack_display.clear_selection()
@@ -393,7 +409,7 @@ func _end_game(reason: String):
 
 
 func _on_board_cell_clicked(row: int, col: int):
-	if _state != GameState.HUMAN_TURN:
+	if _state != GameState.HUMAN_TURN or not _my_turn:
 		return
 	if _exchange_mode:
 		return
@@ -435,7 +451,7 @@ func _on_board_cell_clicked(row: int, col: int):
 
 
 func _on_rack_tile_selected(index: int):
-	if _state != GameState.HUMAN_TURN:
+	if _state != GameState.HUMAN_TURN or not _my_turn:
 		return
 	if _placed_rack_indices.has(index):
 		return
@@ -447,14 +463,14 @@ func _on_rack_tile_selected(index: int):
 
 
 func _on_rack_tile_deselected():
-	if _state != GameState.HUMAN_TURN:
+	if _state != GameState.HUMAN_TURN or not _my_turn:
 		return
 	if not _exchange_mode:
 		_selected_rack_index = -1
 
 
 func _on_placed_tile_clicked(index: int):
-	if _state != GameState.HUMAN_TURN:
+	if _state != GameState.HUMAN_TURN or not _my_turn:
 		return
 
 	var rack_str = _human_rack.get_tiles()
@@ -472,7 +488,7 @@ func _on_placed_tile_clicked(index: int):
 
 
 func _on_submit():
-	if _state != GameState.HUMAN_TURN:
+	if _state != GameState.HUMAN_TURN or not _my_turn:
 		return
 	if _pending_placements.is_empty():
 		_set_status("Place tiles on the board first")
@@ -483,11 +499,25 @@ func _on_submit():
 		_set_status(result.reason)
 		return
 
+	if _online_mode:
+		if Net.is_host:
+			_online.apply_human_move(result)
+		else:
+			_online.send_guest_action({"type": "play", "tiles": _online.serialize_placements()})
+		return
+
 	_apply_human_move(result)
 
 
 func _on_pass():
-	if _state != GameState.HUMAN_TURN:
+	if _state != GameState.HUMAN_TURN or not _my_turn:
+		return
+
+	if _online_mode:
+		if Net.is_host:
+			_online.host_pass()
+		else:
+			_online.send_guest_action({"type": "pass"})
 		return
 
 	_consecutive_passes += 1
@@ -505,11 +535,16 @@ func _on_pass():
 
 
 func _on_exchange():
-	if _state != GameState.HUMAN_TURN:
+	if _state != GameState.HUMAN_TURN or not _my_turn:
 		return
 
 	if not _exchange_mode:
-		if _bag.is_empty():
+		var bag_empty := false
+		if _online_mode and not Net.is_host:
+			bag_empty = _bag_count <= 0
+		else:
+			bag_empty = _bag.is_empty()
+		if bag_empty:
 			_set_status("No tiles left in the bag to exchange")
 			return
 		_exchange_mode = true
@@ -536,15 +571,23 @@ func _on_exchange():
 		if i < rack_str.length():
 			exchange_letters += rack_str[i]
 
+	_exchange_mode = false
+	rack_display.set_exchange_mode(false)
+	_set_status("Exchanged %d tiles" % exchange_letters.length())
+
+	if _online_mode:
+		if Net.is_host:
+			_online.host_exchange(exchange_letters)
+		else:
+			_online.send_guest_action({"type": "exchange", "letters": exchange_letters})
+		return
+
 	for c in exchange_letters:
 		_human_rack.remove_letter(c)
 
 	var new_tiles = _bag.exchange(exchange_letters)
 	_human_rack.add_tiles(new_tiles)
 
-	_exchange_mode = false
-	rack_display.set_exchange_mode(false)
-	_set_status("Exchanged %d tiles" % exchange_letters.length())
 	_update_display()
 	_auto_save()
 
@@ -681,13 +724,16 @@ func _update_display():
 	rack_display.display(_human_rack.get_tiles(), _selected_rack_index, _placed_rack_indices)
 
 	player_score_label.text = "You: %d" % _human_score
-	ai_score_label.text = "AI: %d" % _ai_score
+	if _online_mode:
+		ai_score_label.text = "Opponent: %d" % _ai_score
+	else:
+		ai_score_label.text = "AI: %d" % _ai_score
 
 	submit_button.disabled = not (
-		_state == GameState.HUMAN_TURN and not _pending_placements.is_empty()
+		_state == GameState.HUMAN_TURN and _my_turn and not _pending_placements.is_empty()
 	)
-	pass_button.disabled = _state != GameState.HUMAN_TURN
-	exchange_button.disabled = _state != GameState.HUMAN_TURN
+	pass_button.disabled = not (_state == GameState.HUMAN_TURN and _my_turn)
+	exchange_button.disabled = not (_state == GameState.HUMAN_TURN and _my_turn)
 
 	var exchange_count = rack_display.get_exchange_indices().size() if _exchange_mode else 0
 	if _exchange_mode:
@@ -803,6 +849,12 @@ func _auto_save() -> void:
 
 func _on_play_again():
 	game_overlay.hide()
+	if _online_mode:
+		if Net.is_host:
+			_online.start_online_game()
+		else:
+			_online.send_guest_action({"type": "rematch"})
+		return
 	_save_slot = _assign_save_slot()
 	_start_game()
 	_auto_save()
@@ -920,5 +972,11 @@ func _make_style(bg: Color, border: Color, radius: float) -> StyleBoxFlat:
 
 
 func _on_main_menu():
-	_auto_save()
+	if not _online_mode:
+		_auto_save()
 	get_tree().change_scene_to_file("res://scenes/main_menu/MainMenu.tscn")
+
+
+func _exit_tree() -> void:
+	if _online_mode:
+		Net.teardown()
