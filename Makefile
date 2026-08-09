@@ -1,4 +1,4 @@
-.PHONY: test lint lint-fix run android android-release android-debug web web-debug clean help
+.PHONY: test lint lint-fix run android android-release android-debug web web-debug clean signal-dev help
 
 # Python env
 VENV    ?= ../fastapi_env
@@ -41,6 +41,13 @@ web:
 web-debug:
 	GODOT=$(GODOT) BUILD_MODE=debug ./build-web.sh
 
+# ── Signaling ───────────────────────────────────────────────────────────────
+SIGNAL_DIR ?= tools/webrtc_signaling
+DENO      ?= deno
+
+signal-dev:
+	cd $(SIGNAL_DIR) && $(DENO) run --allow-net --unstable-kv server.ts
+
 # ── Clean ───────────────────────────────────────────────────────────────────
 clean:
 	rm -rf android/ export/ScrabbleProject.apk export/web/
@@ -56,6 +63,7 @@ help:
 	@echo "  android-debug  Build Android APK (debug)"
 	@echo "  web            Build Web (HTML5) export (release)"
 	@echo "  web-debug      Build Web (HTML5) export (debug)"
+	@echo "  signal-dev     Run the local WebRTC signaling server"
 	@echo "  clean          Remove Android/Web build artifacts"
 	@echo ""
 	@echo "Variables:"
