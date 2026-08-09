@@ -70,6 +70,8 @@ func _on_connection_open(_pc: WebRTCPeerConnection) -> void:
 		multiplayer.peer_connected.connect(_on_peer_connected)
 		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	session_started.emit(is_host)
+	print("[Net] Emitting peer_connected to transition UI to Game.tscn...")
+	peer_connected.emit()
 
 
 func _on_peer_connected(_id: int) -> void:

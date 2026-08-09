@@ -82,7 +82,7 @@ func _on_back_pressed() -> void:
 
 
 func _exit_tree() -> void:
-	Net.teardown()
+	pass
 
 
 func _on_theme_changed(dark: bool) -> void:
