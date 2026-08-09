@@ -5,8 +5,15 @@ export function generate_room_code(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
 
-export function parse_message(text: string): Record<string, unknown> | null {
+export function parse_message(data: unknown): Record<string, unknown> | null {
   try {
+    const text = typeof data === "string"
+      ? data
+      : data instanceof ArrayBuffer
+      ? new TextDecoder().decode(data)
+      : data instanceof Uint8Array
+      ? new TextDecoder().decode(data)
+      : String(data);
     const obj = JSON.parse(text);
     if (typeof obj?.type !== "string") return null;
     if (obj.type === "join" && obj.room === undefined) return null;
@@ -47,10 +54,15 @@ export function serve(kv: Deno.Kv): void {
     const open_channel = (code: string) => {
       channel = new BroadcastChannel(`room:${code}`);
       channel.onmessage = (ev) => {
-        const msg = JSON.parse(String(ev.data));
-        if (msg.peer === peer_id) return; // ignore our own echo
-        console.log(`[ws] ${tag()} -> relay ${String(ev.data)}`);
-        socket.send(JSON.stringify(msg));
+        try {
+          const msg = typeof ev.data === "string" ? JSON.parse(ev.data) : ev.data;
+          if (msg && msg.peer === peer_id) return; // ignore our own echo
+          const outStr = typeof msg === "string" ? msg : JSON.stringify(msg);
+          console.log(`[ws] ${tag()} -> relay ${outStr}`);
+          socket.send(outStr);
+        } catch (err) {
+          console.error(`[ws] ${tag()} channel relay error:`, err);
+        }
       };
     };
 
@@ -84,6 +96,9 @@ export function serve(kv: Deno.Kv): void {
           await kv.set(["room", room], { players: players + 1 }, { expireIn: ROOM_TTL_MS });
           open_channel(room);
           send({ type: "joined", room, slot: players });
+          if (channel) {
+            channel.postMessage(JSON.stringify({ peer: peer_id, type: "peer_joined", slot: players }));
+          }
           break;
         }
         case "session":

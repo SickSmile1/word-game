@@ -32,6 +32,7 @@ func _init_client(room_code: String, host: bool) -> void:
 	remote_peer_id = 2 if host else 1
 	_client = SignalingClient.new()
 	add_child(_client)
+	_client.peer_created.connect(_on_peer_created)
 	_client.host_connected.connect(_on_host_connected)
 	_client.host_error.connect(_on_net_error)
 	_client.connection_open.connect(_on_connection_open)
@@ -41,11 +42,13 @@ func _init_client(room_code: String, host: bool) -> void:
 		_client.start_guest(room_code)
 
 
-func _on_host_connected(room: String, slot: int) -> void:
-	host_connected.emit(room, slot)
+func _process(_delta: float) -> void:
+	if _mp != null:
+		_mp.poll()
 
 
-func _on_connection_open(pc: WebRTCPeerConnection) -> void:
+func _on_peer_created(pc: WebRTCPeerConnection) -> void:
+	print("[Net] Registering WebRTCPeerConnection with WebRTCMultiplayerPeer (is_host=%s)..." % is_host)
 	_mp = WebRTCMultiplayerPeer.new()
 	if is_host:
 		_mp.create_server()
@@ -53,10 +56,19 @@ func _on_connection_open(pc: WebRTCPeerConnection) -> void:
 	else:
 		_mp.create_client(2)
 		_mp.add_peer(pc, 1)
+
+
+func _on_host_connected(room: String, slot: int) -> void:
+	host_connected.emit(room, slot)
+
+
+func _on_connection_open(_pc: WebRTCPeerConnection) -> void:
+	print("[Net] WebRTC Connected! Setting multiplayer.multiplayer_peer...")
 	multiplayer.multiplayer_peer = _mp
 	active = true
-	multiplayer.peer_connected.connect(_on_peer_connected)
-	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+	if not multiplayer.peer_connected.is_connected(_on_peer_connected):
+		multiplayer.peer_connected.connect(_on_peer_connected)
+		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	session_started.emit(is_host)
 
 
