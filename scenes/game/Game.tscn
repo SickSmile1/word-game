@@ -1,0 +1,429 @@
+[gd_scene load_steps=7 format=3 uid="uid://game_scene"]
+
+[ext_resource type="Script" path="res://scripts/ui/Game.gd" id="1_7mndn"]
+[ext_resource type="Script" path="res://scripts/ui/BoardDisplay.gd" id="2_bvo7h"]
+[ext_resource type="Script" path="res://scripts/ui/RackDisplay.gd" id="3_rj7ih"]
+[ext_resource type="Script" path="res://scripts/ui/GameOverOverlay.gd" id="4_02km6"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button"]
+resource_local_to_scene = true
+bg_color = Color(0.13, 0.13, 0.24, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.91, 0.27, 0.38, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbtn"]
+resource_local_to_scene = true
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+bg_color = Color(0.13, 0.13, 0.24, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.91, 0.27, 0.38, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+resource_local_to_scene = true
+bg_color = Color(0.11, 0.11, 0.20, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.91, 0.27, 0.38, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[node name="Game" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_7mndn")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.08, 0.15, 1)
+
+[node name="DifficultyPanel" type="Panel" parent="."]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -250.0
+offset_right = 300.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="DifficultyVBox" type="VBoxContainer" parent="DifficultyPanel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="DiffTitle" type="Label" parent="DifficultyPanel/DifficultyVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 42
+horizontal_alignment = 1
+text = "Word-Schatz"
+
+[node name="DiffSubtitle" type="Label" parent="DifficultyPanel/DifficultyVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.92, 1)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+text = "Choose Difficulty"
+
+[node name="SpacerTop" type="Control" parent="DifficultyPanel/DifficultyVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EasyButton" type="Button" parent="DifficultyPanel/DifficultyVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(460, 84)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "EASY"
+
+[node name="MediumButton" type="Button" parent="DifficultyPanel/DifficultyVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(460, 84)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "MEDIUM"
+
+[node name="HardButton" type="Button" parent="DifficultyPanel/DifficultyVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(460, 84)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "HARD"
+
+[node name="SpacerBottom" type="Control" parent="DifficultyPanel/DifficultyVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BackMenuButton" type="Button" parent="DifficultyPanel/DifficultyVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(460, 66)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.75, 0.75, 0.85, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "BACK TO MENU"
+
+[node name="GameUI" type="Control" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="TopHUD" type="HBoxContainer" parent="GameUI"]
+anchors_preset = -1
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = 6.0
+offset_top = 4.0
+offset_right = -6.0
+offset_bottom = 48.0
+grow_horizontal = 2
+theme_override_constants/separation = 12
+
+[node name="PlayerScore" type="Label" parent="GameUI/TopHUD"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.24, 0.67, 0.36, 1)
+theme_override_font_sizes/font_size = 22
+vertical_alignment = 1
+text = "You: 0"
+
+[node name="AIScore" type="Label" parent="GameUI/TopHUD"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 2
+vertical_alignment = 1
+text = "AI: 0"
+
+[node name="ThemeButton" type="Button" parent="GameUI/TopHUD"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/normal = SubResource("StyleBoxFlat_topbtn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_topbtn")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_topbtn")
+theme_override_colors/font_color = Color(0.88, 0.88, 0.95, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 14
+text = "LIGHT"
+
+[node name="MenuButton" type="Button" parent="GameUI/TopHUD"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/normal = SubResource("StyleBoxFlat_topbtn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_topbtn")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_topbtn")
+theme_override_colors/font_color = Color(0.88, 0.88, 0.95, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 14
+text = "MENU"
+
+[node name="StatusLabel" type="Label" parent="GameUI"]
+unique_name_in_owner = true
+anchors_preset = -1
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = 6.0
+offset_top = 51.0
+offset_right = -6.0
+offset_bottom = 81.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.92, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+text = "Your turn"
+
+[node name="BoardContainer" type="Control" parent="GameUI"]
+unique_name_in_owner = true
+anchors_preset = -1
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = 84.0
+offset_right = -6.0
+offset_bottom = -137.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BoardDisplay" type="Control" parent="GameUI/BoardContainer"]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+mouse_filter = 1
+script = ExtResource("2_bvo7h")
+
+[node name="ActionButtons" type="HBoxContainer" parent="GameUI"]
+anchors_preset = -1
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = -141.0
+offset_right = -6.0
+offset_bottom = -91.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 8
+
+[node name="SubmitButton" type="Button" parent="GameUI/ActionButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 58)
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+disabled = true
+text = "SUBMIT"
+
+[node name="PassButton" type="Button" parent="GameUI/ActionButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 58)
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "PASS"
+
+[node name="ExchangeButton" type="Button" parent="GameUI/ActionButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 58)
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "EXCHANGE"
+
+[node name="RackContainer" type="CenterContainer" parent="GameUI"]
+anchors_preset = -1
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = -72.0
+offset_right = -6.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="RackDisplay" type="HBoxContainer" parent="GameUI/RackContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+alignment = 1
+script = ExtResource("3_rj7ih")
+
+[node name="GameOverOverlay" type="Control" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4_02km6")
+
+[node name="OverlayBg" type="ColorRect" parent="GameOverOverlay"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.06, 0.06, 0.14, 0.78)
+
+[node name="OverlayPanel" type="Panel" parent="GameOverOverlay"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -250.0
+offset_right = 300.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="OverlayVBox" type="VBoxContainer" parent="GameOverOverlay/OverlayPanel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="GameOverTitle" type="Label" parent="GameOverOverlay/OverlayPanel/OverlayVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 36
+horizontal_alignment = 1
+text = "GAME OVER"
+
+[node name="FinalScores" type="Label" parent="GameOverOverlay/OverlayPanel/OverlayVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+text = "You: 0\nAI: 0"
+
+[node name="WinnerLabel" type="Label" parent="GameOverOverlay/OverlayPanel/OverlayVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+text = ""
+
+[node name="Spacer" type="Control" parent="GameOverOverlay/OverlayPanel/OverlayVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayAgainButton" type="Button" parent="GameOverOverlay/OverlayPanel/OverlayVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(460, 84)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "PLAY AGAIN"
+
+[node name="MainMenuButton" type="Button" parent="GameOverOverlay/OverlayPanel/OverlayVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(460, 84)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "MAIN MENU"
+
+[connection signal="pressed" from="DifficultyPanel/DifficultyVBox/BackMenuButton" to="." method="_on_main_menu"]
+[connection signal="pressed" from="GameOverOverlay/OverlayPanel/OverlayVBox/PlayAgainButton" to="GameOverOverlay" method="_on_play_again"]
+[connection signal="pressed" from="GameOverOverlay/OverlayPanel/OverlayVBox/MainMenuButton" to="GameOverOverlay" method="_on_main_menu"]

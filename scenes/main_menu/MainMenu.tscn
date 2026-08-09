@@ -1,0 +1,503 @@
+[gd_scene load_steps=5 format=3 uid="uid://main_menu"]
+
+[ext_resource type="Script" path="res://scripts/ui/MainMenu.gd" id="1_j3h5c"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bg"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button"]
+resource_local_to_scene = true
+bg_color = Color(0.13, 0.13, 0.24, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.91, 0.27, 0.38, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+resource_local_to_scene = true
+bg_color = Color(0.11, 0.11, 0.20, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.91, 0.27, 0.38, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[node name="MainMenu" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_j3h5c")
+
+[node name="Background" type="ColorRect" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.08, 0.15, 1)
+
+[node name="MenuContainer" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -322.0
+offset_top = -320.0
+offset_right = 322.0
+offset_bottom = 320.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="MenuContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 100)
+theme_override_colors/font_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 72
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "Word-Schatz"
+
+[node name="StartButton" type="Button" parent="MenuContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(644, 102)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 30
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "START"
+
+
+[node name="ContinueButton" type="Button" parent="MenuContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(644, 102)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 30
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "CONTINUE"
+
+[node name="SettingsButton" type="Button" parent="MenuContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(644, 102)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 30
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "SETTINGS"
+
+[node name="QuitButton" type="Button" parent="MenuContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(644, 102)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 30
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "QUIT"
+
+[node name="StartPanel" type="Panel" parent="."]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -260.0
+offset_right = 320.0
+offset_bottom = 260.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+visible = false
+
+[node name="MarginContainer" type="MarginContainer" parent="StartPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 44
+theme_override_constants/margin_top = 44
+theme_override_constants/margin_right = 44
+theme_override_constants/margin_bottom = 44
+
+[node name="StartContainer" type="VBoxContainer" parent="StartPanel/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="StartTitle" type="Label" parent="StartPanel/MarginContainer/StartContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+text = "START GAME"
+
+[node name="OnlineButton" type="Button" parent="StartPanel/MarginContainer/StartContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(552, 92)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "ONLINE"
+
+[node name="VsAiButton" type="Button" parent="StartPanel/MarginContainer/StartContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(552, 92)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "VS AI"
+
+[node name="Spacer" type="Control" parent="StartPanel/MarginContainer/StartContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BackStartButton" type="Button" parent="StartPanel/MarginContainer/StartContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(552, 84)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "BACK"
+
+[node name="SettingsPanel" type="Panel" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+visible = false
+
+[node name="MarginContainer" type="MarginContainer" parent="SettingsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 48
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 48
+
+[node name="SettingsContainer" type="VBoxContainer" parent="SettingsPanel/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="SettingsTitle" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+text = "SETTINGS"
+
+[node name="VolumeSection" type="VBoxContainer" parent="SettingsPanel/MarginContainer/SettingsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="VolumeLabel" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.92, 1)
+theme_override_font_sizes/font_size = 20
+text = "VOLUME"
+
+[node name="MusicRow" type="HBoxContainer" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection"]
+layout_mode = 2
+
+[node name="MusicLabel" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/MusicRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 0)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+vertical_alignment = 1
+text = "Music"
+
+[node name="MusicSlider" type="HSlider" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/MusicRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.8
+
+[node name="MusicValue" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/MusicRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(40, 0)
+theme_override_colors/font_color = Color(0.75, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 2
+vertical_alignment = 1
+text = "80"
+
+[node name="EffectsRow" type="HBoxContainer" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection"]
+layout_mode = 2
+
+[node name="EffectsLabel" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/EffectsRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 0)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+vertical_alignment = 1
+text = "Effects"
+
+[node name="EffectsSlider" type="HSlider" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/EffectsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.8
+
+[node name="EffectsValue" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/EffectsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(40, 0)
+theme_override_colors/font_color = Color(0.75, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 2
+vertical_alignment = 1
+text = "80"
+
+[node name="OverallRow" type="HBoxContainer" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection"]
+layout_mode = 2
+
+[node name="OverallLabel" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/OverallRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 0)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+vertical_alignment = 1
+text = "Overall"
+
+[node name="OverallSlider" type="HSlider" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/OverallRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="OverallValue" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/OverallRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(40, 0)
+theme_override_colors/font_color = Color(0.75, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 2
+vertical_alignment = 1
+text = "100"
+
+[node name="FpsSection" type="VBoxContainer" parent="SettingsPanel/MarginContainer/SettingsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="FpsLabel" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/FpsSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.92, 1)
+theme_override_font_sizes/font_size = 20
+text = "FPS"
+
+[node name="FpsRow" type="HBoxContainer" parent="SettingsPanel/MarginContainer/SettingsContainer/FpsSection"]
+layout_mode = 2
+alignment = 1
+
+[node name="Fps30Button" type="Button" parent="SettingsPanel/MarginContainer/SettingsContainer/FpsSection/FpsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(184, 66)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_colors/font_color = Color(0.70, 0.70, 0.82, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 24
+toggle_mode = true
+text = "30"
+
+[node name="Fps60Button" type="Button" parent="SettingsPanel/MarginContainer/SettingsContainer/FpsSection/FpsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(184, 66)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_colors/font_color = Color(0.70, 0.70, 0.82, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 24
+toggle_mode = true
+button_pressed = true
+text = "60"
+
+[node name="ThemeSection" type="VBoxContainer" parent="SettingsPanel/MarginContainer/SettingsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ThemeLabel" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/ThemeSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.92, 1)
+theme_override_font_sizes/font_size = 20
+text = "THEME"
+
+[node name="ThemeRow" type="HBoxContainer" parent="SettingsPanel/MarginContainer/SettingsContainer/ThemeSection"]
+layout_mode = 2
+alignment = 1
+
+[node name="DarkButton" type="Button" parent="SettingsPanel/MarginContainer/SettingsContainer/ThemeSection/ThemeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(184, 66)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_colors/font_color = Color(0.70, 0.70, 0.82, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 24
+toggle_mode = true
+button_pressed = true
+text = "DARK"
+
+[node name="LightButton" type="Button" parent="SettingsPanel/MarginContainer/SettingsContainer/ThemeSection/ThemeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(184, 66)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_colors/font_color = Color(0.70, 0.70, 0.82, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 24
+toggle_mode = true
+text = "LIGHT"
+
+[node name="Spacer" type="Control" parent="SettingsPanel/MarginContainer/SettingsContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CloseSettingsButton" type="Button" parent="SettingsPanel/MarginContainer/SettingsContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(552, 84)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "CLOSE"
+
+[node name="ContinuePanel" type="Panel" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+visible = false
+
+[node name="MarginContainer" type="MarginContainer" parent="ContinuePanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 48
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 48
+
+[node name="ContinueVBox" type="VBoxContainer" parent="ContinuePanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="ContinueTitle" type="Label" parent="ContinuePanel/MarginContainer/ContinueVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+text = "CONTINUE GAME"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="ContinuePanel/MarginContainer/ContinueVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(400, 0)
+
+[node name="SlotList" type="VBoxContainer" parent="ContinuePanel/MarginContainer/ContinueVBox/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 12
+
+[node name="NoSavesLabel" type="Label" parent="ContinuePanel/MarginContainer/ContinueVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "No saved games found"
+
+[node name="Spacer" type="Control" parent="ContinuePanel/MarginContainer/ContinueVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BackContinueButton" type="Button" parent="ContinuePanel/MarginContainer/ContinueVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(552, 84)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "BACK"

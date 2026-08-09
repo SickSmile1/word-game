@@ -1,0 +1,5511 @@
+========================================================================
+SCRABBLE PROJECT — FULL CODE DUMP
+Generated from: /home/ilia/Documents/GIT/scrabble_project
+========================================================================
+
+------------------------------------------------------------------------
+FILE: .devcontainer/devcontainer.json
+PATH: /home/ilia/Documents/GIT/scrabble_project/.devcontainer/devcontainer.json
+------------------------------------------------------------------------
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/universal
+{
+	"name": "Default Linux Universal",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/universal:6-linux"
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "uname -a",
+
+	// Configure tool-specific properties.
+	// "customizations": {},
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}
+
+------------------------------------------------------------------------
+FILE: .gdlintrc
+PATH: /home/ilia/Documents/GIT/scrabble_project/.gdlintrc
+------------------------------------------------------------------------
+max-line-length: 160
+unused-argument: null
+function-variable-name: '(_?[a-z][a-z0-9]*(_[a-z0-9]+)*|[A-Z][A-Z0-9]*(_[A-Z0-9]+)*)'
+class-variable-name: _?[a-z][a-z0-9]*(_[a-z0-9]+)*
+function-argument-name: _?[a-z][a-z0-9]*(_[a-z0-9]+)*
+signal-name: '[a-z][a-z0-9]*(_[a-z0-9]+)*'
+excluded_directories: !!set
+  .git: null
+  addons: null
+
+------------------------------------------------------------------------
+FILE: .github/dependabot.yml
+PATH: /home/ilia/Documents/GIT/scrabble_project/.github/dependabot.yml
+------------------------------------------------------------------------
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for more information:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+# https://containers.dev/guide/dependabot
+
+version: 2
+updates:
+ - package-ecosystem: "devcontainers"
+   directory: "/"
+   schedule:
+     interval: weekly
+
+------------------------------------------------------------------------
+FILE: .gitignore
+PATH: /home/ilia/Documents/GIT/scrabble_project/.gitignore
+------------------------------------------------------------------------
+# Godot specific ignores
+.godot/
+import/
+*.translation
+*.uid
+
+# Export
+export/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build
+android/
+ios/
+web/
+
+------------------------------------------------------------------------
+FILE: .gutconfig.json
+PATH: /home/ilia/Documents/GIT/scrabble_project/.gutconfig.json
+------------------------------------------------------------------------
+{
+	"dirs": ["res://tests/"],
+	"include_subdirs": true,
+	"prefix": "test_",
+	"suffix": ".gd"
+}
+
+------------------------------------------------------------------------
+FILE: Makefile
+PATH: /home/ilia/Documents/GIT/scrabble_project/Makefile
+------------------------------------------------------------------------
+.PHONY: test lint lint-fix help
+
+# Python env
+VENV    ?= ../fastapi_env
+PYTHON  ?= $(VENV)/bin/python3
+GDLINT  ?= $(VENV)/bin/gdlint
+GDFORMAT ?= $(VENV)/bin/gdformat
+
+# Godot executable (override with GODOT=path/to/godot)
+GODOT   ?= godot
+
+# Directories to lint/test
+GD_SOURCES := scripts/ tests/
+
+# ── Tests (GUT) ─────────────────────────────────────────────────────────────
+test:
+	$(GODOT) --headless --addon gut
+
+# ── Linting ─────────────────────────────────────────────────────────────────
+lint:
+	$(GDLINT) $(GD_SOURCES)
+
+lint-fix:
+	$(GDFORMAT) $(GD_SOURCES)
+
+# ── Help ────────────────────────────────────────────────────────────────────
+help:
+	@echo "Targets:"
+	@echo "  test       Run GUT unit tests in headless Godot"
+	@echo "  lint       Run gdlint on scripts/ and tests/"
+	@echo "  lint-fix   Auto-format scripts/ and tests/ with gdformat"
+	@echo ""
+	@echo "Variables:"
+	@echo "  GODOT=$(GODOT)     Godot executable path"
+	@echo "  GDLINT=$(GDLINT)   gdlint command (from $(VENV))"
+	@echo "  GDFORMAT=$(GDFORMAT)"
+
+------------------------------------------------------------------------
+FILE: default_bus_layout.tres
+PATH: /home/ilia/Documents/GIT/scrabble_project/default_bus_layout.tres
+------------------------------------------------------------------------
+[gd_resource type="AudioBusLayout" format=3 uid="uid://default_bus_layout"]
+
+[resource]
+bus/0/name = "Master"
+bus/0/volume_db = 0.0
+bus/0/send = "Master"
+bus/1/name = "Music"
+bus/1/volume_db = 0.0
+bus/1/send = "Master"
+bus/2/name = "Effects"
+bus/2/volume_db = 0.0
+bus/2/send = "Master"
+
+------------------------------------------------------------------------
+FILE: default_env.tres
+PATH: /home/ilia/Documents/GIT/scrabble_project/default_env.tres
+------------------------------------------------------------------------
+[gd_resource type="Environment" load_steps=2 format=3 uid="uid://default_env"]
+
+[sub_resource type="Sky" id="Sky_1"]
+
+[resource]
+background_mode = 2
+background_sky = SubResource("Sky_1")
+background_sky_custom_fov = 0.0
+ambient_light_color = Color(0.1, 0.1, 0.15, 1)
+fog_enabled = false
+
+------------------------------------------------------------------------
+FILE: dump_code.py
+PATH: /home/ilia/Documents/GIT/scrabble_project/dump_code.py
+------------------------------------------------------------------------
+#!/usr/bin/env python3
+"""Dumps all project source code into a single text file,
+excluding packages / dependencies / build artifacts."""
+
+import os
+from pathlib import Path
+
+PROJECT = Path(__file__).resolve().parent
+OUTPUT = PROJECT / "code_dump.txt"
+
+EXCLUDE_DIRS = {
+    ".git",
+    ".godot",
+    "addons",
+    "__pycache__",
+    "venv",
+    "env",
+    ".venv",
+    "node_modules",
+    "export",
+    "android",
+    "ios",
+    "web",
+    "assets",
+}
+
+EXCLUDE_EXTENSIONS = {
+    ".import",
+    ".uid",
+    ".cache",
+    ".bin",
+}
+
+ALWAYS_INCLUDE_EXTENSIONS = {
+    ".gd",
+    ".tscn",
+    ".tres",
+    ".cfg",
+    ".json",
+    ".yml",
+    ".yaml",
+    ".md",
+    ".txt",
+    ".svg",
+    ".py",
+    ".gitignore",
+    ".gdlintrc",
+}
+
+
+def should_skip(path: Path) -> bool:
+    parts = path.relative_to(PROJECT).parts
+    if any(p in EXCLUDE_DIRS for p in parts):
+        return True
+    if path.suffix in EXCLUDE_EXTENSIONS:
+        return True
+    if path.name == "project.godot":
+        return False
+    return False
+
+
+def collect_files() -> list[Path]:
+    files: list[Path] = []
+    for root, dirs, names in os.walk(PROJECT):
+        root_p = Path(root)
+        rel = root_p.relative_to(PROJECT)
+        if any(p in EXCLUDE_DIRS for p in rel.parts):
+            continue
+        for name in names:
+            fp = root_p / name
+            if should_skip(fp):
+                continue
+            ext = fp.suffix
+            if ext in ALWAYS_INCLUDE_EXTENSIONS or ext == "":
+                # Check if it's a text-like file
+                pass
+            else:
+                continue
+            files.append(fp)
+    files.sort(key=lambda p: p.relative_to(PROJECT))
+    return files
+
+
+def main():
+    files = collect_files()
+
+    with open(OUTPUT, "w", encoding="utf-8") as out:
+        out.write("=" * 72 + "\n")
+        out.write("SCRABBLE PROJECT — FULL CODE DUMP\n")
+        out.write(f"Generated from: {PROJECT}\n")
+        out.write("=" * 72 + "\n\n")
+
+        for fp in files:
+            rel = fp.relative_to(PROJECT)
+            try:
+                content = fp.read_text(encoding="utf-8")
+            except Exception as e:
+                content = f"[ERROR reading file: {e}]\n"
+
+            out.write("-" * 72 + "\n")
+            out.write(f"FILE: {rel}\n")
+            out.write(f"PATH: {fp}\n")
+            out.write("-" * 72 + "\n")
+            out.write(content)
+            if not content.endswith("\n"):
+                out.write("\n")
+            out.write("\n")
+
+    print(f"Done — wrote {len(files)} files to {OUTPUT}")
+
+
+if __name__ == "__main__":
+    main()
+
+------------------------------------------------------------------------
+FILE: export_presets.cfg
+PATH: /home/ilia/Documents/GIT/scrabble_project/export_presets.cfg
+------------------------------------------------------------------------
+[preset.0]
+
+name="Android"
+platform="Android"
+runnable=true
+dedicated_server=false
+custom_features=""
+export_filter="all_resources"
+include_filter="*.txt"
+exclude_filter=""
+export_path="export/ScrabbleProject.apk"
+encryption_include_filters=""
+encryption_exclude_filters=""
+encryption_pck=false
+encryption_key=""
+
+[preset.0.options]
+
+custom_package/debug=""
+custom_package/release=""
+apk_expansion/enable=false
+apk_expansion/version=1
+apk_expansion/S3_region="us-east-1"
+apk_expansion/S3_bucket=""
+apk_expansion/S3_access_key=""
+apk_expansion/S3_secret_key=""
+gradle_build/use_gradle_build=true
+gradle_build/export_format=0
+gradle_build/min_sdk=23
+gradle_build/target_sdk=33
+gradle_build/build_format=1
+permissions/access_checkin_properties=false
+permissions/access_coarse_location=false
+permissions/access_fine_location=false
+permissions/access_location_extra_commands=false
+permissions/access_mock_location=false
+permissions/access_network_state=true
+permissions/access_surface_flinger=false
+permissions/access_wifi_state=true
+permissions/account_manager=false
+permissions/authenticate_accounts=false
+permissions/battery_stats=false
+permissions/bind_accessibility_service=false
+permissions/bind_app_widget=false
+permissions/bind_device_admin=false
+permissions/bind_input_method=false
+permissions/bind_nfc_service=false
+permissions/bind_notification_listener_service=false
+permissions/bind_print_service=false
+permissions/bind_remoteviews=false
+permissions/bind_text_service=false
+permissions/bind_vpn_service=false
+permissions/bind_wallpaper=false
+permissions/bluetooth=false
+permissions/bluetooth_admin=false
+permissions/bluetooth_privileged=false
+permissions/brick=false
+permissions/broadcast_package_removed=false
+permissions/broadcast_sms=false
+permissions/broadcast_sticky=false
+permissions/broadcast_wap_push=false
+permissions/call_phone=false
+permissions/call_privileged=false
+permissions/camera=false
+permissions/capture_audio_output=false
+permissions/capture_secure_video_output=false
+permissions/capture_video_output=false
+permissions/change_component_enabled_state=false
+permissions/change_configuration=false
+permissions/change_network_state=false
+permissions/change_wifi_multicast_state=false
+permissions/change_wifi_state=false
+permissions/clear_app_cache=false
+permissions/clear_app_user_data=false
+permissions/control_location_updates=false
+permissions/delete_cache_files=false
+permissions/delete_packages=false
+permissions/device_power=false
+permissions/diagnostic=false
+permissions/disable_keyguard=false
+permissions/dump=false
+permissions/expand_status_bar=false
+permissions/factory_test=false
+permissions/flashlight=false
+permissions/force_back=false
+permissions/get_accounts=false
+permissions/get_package_size=false
+permissions/get_tasks=false
+permissions/get_top_activity_info=false
+permissions/global_search=false
+permissions/hardware_test=false
+permissions/inject_events=false
+permissions/install_location_provider=false
+permissions/install_packages=false
+permissions/install_shortcut=false
+permissions/internal_system_window=false
+permissions/internet=true
+permissions/kill_background_processes=false
+permissions/location_hardware=false
+permissions/manage_accounts=false
+permissions/manage_app_tokens=false
+permissions/manage_documents=false
+permissions/manage_external_storage=false
+permissions/master_clear=false
+permissions/media_content_control=false
+permissions/modify_audio_settings=false
+permissions/modify_phone_state=false
+permissions/mount_format_filesystems=false
+permissions/mount_unmount_filesystems=false
+permissions/nfc=false
+permissions/persistent_activity=false
+permissions/process_outgoing_calls=false
+permissions/read_calendar=false
+permissions/read_call_log=false
+permissions/read_contacts=false
+permissions/read_external_storage=false
+permissions/read_frame_buffer=false
+permissions/read_history_bookmarks=false
+permissions/read_input_state=false
+permissions/read_logs=false
+permissions/read_phone_state=false
+permissions/read_profile=false
+permissions/read_sms=false
+permissions/read_social_stream=false
+permissions/read_sync_settings=false
+permissions/read_sync_stats=false
+permissions/read_user_dictionary=false
+permissions/reboot=false
+permissions/record_audio=false
+permissions/reorder_tasks=false
+permissions/request_install_packages=false
+permissions/restart_packages=false
+permissions/send_sms=false
+permissions/set_activity_watcher=false
+permissions/set_alarm=false
+permissions/set_always_finish=false
+permissions/set_animation_scale=false
+permissions/set_debug_app=false
+permissions/set_orientation=false
+permissions/set_pointer_speed=false
+permissions/set_preferred_applications=false
+permissions/set_process_limit=false
+permissions/set_time=false
+permissions/set_time_zone=false
+permissions/set_wallpaper=false
+permissions/set_wallpaper_hints=false
+permissions/signal_persistent_processes=false
+permissions/status_bar=false
+permissions/subscribed_feeds_read=false
+permissions/subscribed_feeds_write=false
+permissions/system_alert_window=false
+permissions/transmit_ir=false
+permissions/uninstall_shortcut=false
+permissions/update_device_stats=false
+permissions/use_credentials=false
+permissions/use_sip=false
+permissions/vibrate=true
+permissions/wake_lock=true
+permissions/write_apn_settings=false
+permissions/write_calendar=false
+permissions/write_call_log=false
+permissions/write_contacts=false
+permissions/write_external_storage=true
+permissions/write_greylist=false
+permissions/write_history_bookmarks=false
+permissions/write_profile=false
+permissions/write_sms=false
+permissions/write_social_stream=false
+permissions/write_sync_settings=false
+permissions/write_user_dictionary=false
+
+------------------------------------------------------------------------
+FILE: icon.svg
+PATH: /home/ilia/Documents/GIT/scrabble_project/icon.svg
+------------------------------------------------------------------------
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <rect width="256" height="256" rx="32" fill="#1a1a2e"/>
+  <text x="128" y="160" font-family="Arial, sans-serif" font-size="120" font-weight="bold" fill="#e94560" text-anchor="middle">S</text>
+</svg>
+
+------------------------------------------------------------------------
+FILE: requirements.txt
+PATH: /home/ilia/Documents/GIT/scrabble_project/requirements.txt
+------------------------------------------------------------------------
+gdtoolkit>=4.5
+
+------------------------------------------------------------------------
+FILE: scenes/game/Game.tscn
+PATH: /home/ilia/Documents/GIT/scrabble_project/scenes/game/Game.tscn
+------------------------------------------------------------------------
+[gd_scene load_steps=6 format=3 uid="uid://game_scene"]
+
+[ext_resource type="Script" path="res://scripts/ui/Game.gd" id="1_7mndn"]
+[ext_resource type="Script" path="res://scripts/ui/BoardDisplay.gd" id="2_bvo7h"]
+[ext_resource type="Script" path="res://scripts/ui/RackDisplay.gd" id="3_rj7ih"]
+[ext_resource type="Script" path="res://scripts/ui/GameOverOverlay.gd" id="4_02km6"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button"]
+resource_local_to_scene = true
+bg_color = Color(0.15, 0.15, 0.25, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.91, 0.27, 0.38, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+resource_local_to_scene = true
+bg_color = Color(0.1, 0.1, 0.18, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.91, 0.27, 0.38, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[node name="Game" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_7mndn")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.07, 0.07, 0.12, 1)
+
+[node name="DifficultyPanel" type="Panel" parent="."]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -200.0
+offset_right = 250.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="DifficultyVBox" type="VBoxContainer" parent="DifficultyPanel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="DiffTitle" type="Label" parent="DifficultyPanel/DifficultyVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 36
+horizontal_alignment = 1
+text = "SCRABBLE"
+
+[node name="DiffSubtitle" type="Label" parent="DifficultyPanel/DifficultyVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+text = "Choose Difficulty"
+
+[node name="SpacerTop" type="Control" parent="DifficultyPanel/DifficultyVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EasyButton" type="Button" parent="DifficultyPanel/DifficultyVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(300, 56)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "EASY"
+
+[node name="MediumButton" type="Button" parent="DifficultyPanel/DifficultyVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(300, 56)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "MEDIUM"
+
+[node name="HardButton" type="Button" parent="DifficultyPanel/DifficultyVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(300, 56)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "HARD"
+
+[node name="SpacerBottom" type="Control" parent="DifficultyPanel/DifficultyVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BackMenuButton" type="Button" parent="DifficultyPanel/DifficultyVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(300, 40)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "BACK TO MENU"
+
+[node name="GameUI" type="Control" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="TopHUD" type="HBoxContainer" parent="GameUI"]
+anchors_preset = -1
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = -20.0
+offset_bottom = 60.0
+grow_horizontal = 2
+
+[node name="PlayerScore" type="Label" parent="GameUI/TopHUD"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.3, 0.9, 0.3, 1)
+theme_override_font_sizes/font_size = 22
+vertical_alignment = 1
+text = "You: 0"
+
+[node name="AIScore" type="Label" parent="GameUI/TopHUD"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 2
+vertical_alignment = 1
+text = "AI: 0"
+
+[node name="ThemeButton" type="Button" parent="GameUI/TopHUD"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 14
+text = "LIGHT"
+
+[node name="MenuButton" type="Button" parent="GameUI/TopHUD"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 14
+text = "MENU"
+
+[node name="StatusLabel" type="Label" parent="GameUI"]
+unique_name_in_owner = true
+anchors_preset = -1
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = 20.0
+offset_top = 65.0
+offset_right = -20.0
+offset_bottom = 100.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+text = "Your turn"
+
+[node name="BoardContainer" type="Control" parent="GameUI"]
+unique_name_in_owner = true
+anchors_preset = -1
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 110.0
+offset_right = -10.0
+offset_bottom = -195.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BoardDisplay" type="Control" parent="GameUI/BoardContainer"]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+mouse_filter = 1
+script = ExtResource("2_bvo7h")
+
+[node name="ActionButtons" type="HBoxContainer" parent="GameUI"]
+anchors_preset = -1
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 60.0
+offset_top = -170.0
+offset_right = -60.0
+offset_bottom = -135.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 16
+
+[node name="SubmitButton" type="Button" parent="GameUI/ActionButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+disabled = true
+text = "SUBMIT"
+
+[node name="PassButton" type="Button" parent="GameUI/ActionButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "PASS"
+
+[node name="ExchangeButton" type="Button" parent="GameUI/ActionButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "EXCHANGE"
+
+[node name="RackContainer" type="CenterContainer" parent="GameUI"]
+anchors_preset = -1
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -125.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="RackDisplay" type="HBoxContainer" parent="GameUI/RackContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+alignment = 1
+script = ExtResource("3_rj7ih")
+
+[node name="GameOverOverlay" type="Control" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4_02km6")
+
+[node name="OverlayBg" type="ColorRect" parent="GameOverOverlay"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="OverlayPanel" type="Panel" parent="GameOverOverlay"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -200.0
+offset_right = 250.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="OverlayVBox" type="VBoxContainer" parent="GameOverOverlay/OverlayPanel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="GameOverTitle" type="Label" parent="GameOverOverlay/OverlayPanel/OverlayVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 36
+horizontal_alignment = 1
+text = "GAME OVER"
+
+[node name="FinalScores" type="Label" parent="GameOverOverlay/OverlayPanel/OverlayVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+text = "You: 0\nAI: 0"
+
+[node name="WinnerLabel" type="Label" parent="GameOverOverlay/OverlayPanel/OverlayVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+text = ""
+
+[node name="Spacer" type="Control" parent="GameOverOverlay/OverlayPanel/OverlayVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayAgainButton" type="Button" parent="GameOverOverlay/OverlayPanel/OverlayVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(300, 56)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "PLAY AGAIN"
+
+[node name="MainMenuButton" type="Button" parent="GameOverOverlay/OverlayPanel/OverlayVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(300, 56)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "MAIN MENU"
+
+[connection signal="pressed" from="DifficultyPanel/DifficultyVBox/BackMenuButton" to="." method="_on_main_menu"]
+[connection signal="pressed" from="GameOverOverlay/OverlayPanel/OverlayVBox/PlayAgainButton" to="GameOverOverlay" method="_on_play_again"]
+[connection signal="pressed" from="GameOverOverlay/OverlayPanel/OverlayVBox/MainMenuButton" to="GameOverOverlay" method="_on_main_menu"]
+
+------------------------------------------------------------------------
+FILE: scenes/main_menu/MainMenu.tscn
+PATH: /home/ilia/Documents/GIT/scrabble_project/scenes/main_menu/MainMenu.tscn
+------------------------------------------------------------------------
+[gd_scene load_steps=5 format=3 uid="uid://main_menu"]
+
+[ext_resource type="Script" path="res://scripts/ui/MainMenu.gd" id="1_j3h5c"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bg"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button"]
+resource_local_to_scene = true
+bg_color = Color(0.15, 0.15, 0.25, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.91, 0.27, 0.38, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+resource_local_to_scene = true
+bg_color = Color(0.1, 0.1, 0.18, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.91, 0.27, 0.38, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[node name="MainMenu" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_j3h5c")
+
+[node name="Background" type="ColorRect" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.07, 0.07, 0.12, 1)
+
+[node name="TitleLabel" type="Label" parent="."]
+unique_name_in_owner = true
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.08
+anchor_right = 0.5
+anchor_bottom = 0.08
+offset_left = -300.0
+offset_top = 0.0
+offset_right = 300.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 64
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "SCRABBLE"
+
+[node name="MenuContainer" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -220.0
+offset_right = 200.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="StartButton" type="Button" parent="MenuContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(400, 64)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "START"
+
+
+[node name="ContinueButton" type="Button" parent="MenuContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(400, 64)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "CONTINUE"
+
+[node name="SettingsButton" type="Button" parent="MenuContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(400, 64)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "SETTINGS"
+
+[node name="QuitButton" type="Button" parent="MenuContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(400, 64)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "QUIT"
+
+[node name="StartPanel" type="Panel" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+visible = false
+
+[node name="MarginContainer" type="MarginContainer" parent="StartPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 48
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 48
+
+[node name="StartContainer" type="VBoxContainer" parent="StartPanel/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="StartTitle" type="Label" parent="StartPanel/MarginContainer/StartContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+text = "START GAME"
+
+[node name="OnlineButton" type="Button" parent="StartPanel/MarginContainer/StartContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(400, 64)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "ONLINE"
+
+[node name="VsAiButton" type="Button" parent="StartPanel/MarginContainer/StartContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(400, 64)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "VS AI"
+
+[node name="Spacer" type="Control" parent="StartPanel/MarginContainer/StartContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BackStartButton" type="Button" parent="StartPanel/MarginContainer/StartContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(400, 64)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "BACK"
+
+[node name="SettingsPanel" type="Panel" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+visible = false
+
+[node name="MarginContainer" type="MarginContainer" parent="SettingsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 48
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 48
+
+[node name="SettingsContainer" type="VBoxContainer" parent="SettingsPanel/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="SettingsTitle" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+text = "SETTINGS"
+
+[node name="VolumeSection" type="VBoxContainer" parent="SettingsPanel/MarginContainer/SettingsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="VolumeLabel" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 20
+text = "VOLUME"
+
+[node name="MusicRow" type="HBoxContainer" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection"]
+layout_mode = 2
+
+[node name="MusicLabel" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/MusicRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 0)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+vertical_alignment = 1
+text = "Music"
+
+[node name="MusicSlider" type="HSlider" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/MusicRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.8
+
+[node name="MusicValue" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/MusicRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(40, 0)
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 2
+vertical_alignment = 1
+text = "80"
+
+[node name="EffectsRow" type="HBoxContainer" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection"]
+layout_mode = 2
+
+[node name="EffectsLabel" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/EffectsRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 0)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+vertical_alignment = 1
+text = "Effects"
+
+[node name="EffectsSlider" type="HSlider" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/EffectsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.8
+
+[node name="EffectsValue" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/EffectsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(40, 0)
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 2
+vertical_alignment = 1
+text = "80"
+
+[node name="OverallRow" type="HBoxContainer" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection"]
+layout_mode = 2
+
+[node name="OverallLabel" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/OverallRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 0)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+vertical_alignment = 1
+text = "Overall"
+
+[node name="OverallSlider" type="HSlider" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/OverallRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="OverallValue" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/VolumeSection/OverallRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(40, 0)
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 2
+vertical_alignment = 1
+text = "100"
+
+[node name="FpsSection" type="VBoxContainer" parent="SettingsPanel/MarginContainer/SettingsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="FpsLabel" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/FpsSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 20
+text = "FPS"
+
+[node name="FpsRow" type="HBoxContainer" parent="SettingsPanel/MarginContainer/SettingsContainer/FpsSection"]
+layout_mode = 2
+alignment = 1
+
+[node name="Fps30Button" type="Button" parent="SettingsPanel/MarginContainer/SettingsContainer/FpsSection/FpsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(160, 56)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 22
+toggle_mode = true
+text = "30"
+
+[node name="Fps60Button" type="Button" parent="SettingsPanel/MarginContainer/SettingsContainer/FpsSection/FpsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(160, 56)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 22
+toggle_mode = true
+button_pressed = true
+text = "60"
+
+[node name="ThemeSection" type="VBoxContainer" parent="SettingsPanel/MarginContainer/SettingsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ThemeLabel" type="Label" parent="SettingsPanel/MarginContainer/SettingsContainer/ThemeSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 20
+text = "THEME"
+
+[node name="ThemeRow" type="HBoxContainer" parent="SettingsPanel/MarginContainer/SettingsContainer/ThemeSection"]
+layout_mode = 2
+alignment = 1
+
+[node name="DarkButton" type="Button" parent="SettingsPanel/MarginContainer/SettingsContainer/ThemeSection/ThemeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(160, 56)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 22
+toggle_mode = true
+button_pressed = true
+text = "DARK"
+
+[node name="LightButton" type="Button" parent="SettingsPanel/MarginContainer/SettingsContainer/ThemeSection/ThemeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(160, 56)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+theme_override_font_sizes/font_size = 22
+toggle_mode = true
+text = "LIGHT"
+
+[node name="Spacer" type="Control" parent="SettingsPanel/MarginContainer/SettingsContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CloseSettingsButton" type="Button" parent="SettingsPanel/MarginContainer/SettingsContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(400, 64)
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.91, 0.27, 0.38, 1)
+text = "CLOSE"
+
+------------------------------------------------------------------------
+FILE: scripts/ai/AIPlayer.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/scripts/ai/AIPlayer.gd
+------------------------------------------------------------------------
+class_name AIPlayer
+extends RefCounted
+
+const Board = preload("res://scripts/game/Board.gd")
+const MoveGenerator = preload("res://scripts/ai/MoveGenerator.gd")
+
+enum Difficulty {
+	EASY,
+	MEDIUM,
+	HARD,
+}
+
+signal move_chosen(move_data: Dictionary)
+signal thinking_started
+signal thinking_finished
+
+var difficulty: int = Difficulty.HARD
+var move_generator
+var trie
+
+var _thinking := false
+
+
+func _init(diff: int = Difficulty.HARD, mg = null, t = null):
+	difficulty = diff
+	move_generator = mg if mg else MoveGenerator.new()
+	trie = t
+
+
+func set_difficulty(d: int) -> void:
+	difficulty = d
+
+
+func get_difficulty() -> int:
+	return difficulty
+
+
+func get_difficulty_name() -> String:
+	match difficulty:
+		Difficulty.EASY:
+			return "Easy"
+		Difficulty.MEDIUM:
+			return "Medium"
+		Difficulty.HARD:
+			return "Hard"
+	return "Unknown"
+
+
+func is_thinking() -> bool:
+	return _thinking
+
+
+func choose_move(board, rack: String) -> Dictionary:
+	thinking_started.emit()
+	_thinking = true
+
+	if trie == null:
+		push_error("AIPlayer: trie is null, cannot generate moves")
+		_thinking = false
+		thinking_finished.emit()
+		return _make_pass_move()
+
+	var moves = move_generator.generate_moves(board, rack, trie)
+
+	if moves.is_empty():
+		_thinking = false
+		thinking_finished.emit()
+		return _make_pass_move()
+
+	var chosen = _select_move(moves)
+
+	_thinking = false
+	thinking_finished.emit()
+	move_chosen.emit(chosen)
+	return chosen
+
+
+func _select_move(moves: Array) -> Dictionary:
+	var move_count = moves.size()
+
+	match difficulty:
+		Difficulty.EASY:
+			return _select_easy(moves, move_count)
+		Difficulty.MEDIUM:
+			return _select_medium(moves, move_count)
+		Difficulty.HARD:
+			return _select_hard(moves)
+		_:
+			return _select_hard(moves)
+
+
+func _select_hard(moves: Array) -> Dictionary:
+	var scored = _evaluate_moves(moves)
+	scored.sort_custom(func(a, b): return a.eval_score > b.eval_score)
+	return scored[0]
+
+
+func _select_medium(moves: Array, count: int) -> Dictionary:
+	var scored = _evaluate_moves(moves)
+	scored.sort_custom(func(a, b): return a.eval_score > b.eval_score)
+
+	var top_percent = maxi(1, ceil(count * 0.3))
+	var top_moves = scored.slice(0, top_percent)
+	var chosen = top_moves[randi() % top_moves.size()]
+	return chosen
+
+
+func _select_easy(moves: Array, count: int) -> Dictionary:
+	if count > 2 and randf() < 0.1:
+		return _make_pass_move()
+
+	var scored = _evaluate_moves(moves)
+	scored.sort_custom(func(a, b): return a.eval_score > b.eval_score)
+
+	var bottom_percent = maxi(1, ceil(count * 0.4))
+	var bottom_moves = scored.slice(scored.size() - bottom_percent, scored.size())
+
+	if bottom_moves.is_empty():
+		bottom_moves = scored
+
+	var chosen = bottom_moves[randi() % bottom_moves.size()]
+	return chosen
+
+
+func _evaluate_moves(moves: Array) -> Array:
+	var scored: Array = []
+	var max_score := 0
+
+	for m in moves:
+		if m.score > max_score:
+			max_score = m.score
+
+	for m in moves:
+		var eval_score := 0.0
+		var score_weight := 1.0
+		var leave_weight := 0.3
+		var bonus_penalty := 0.15
+
+		eval_score += m.score * score_weight
+
+		eval_score += _evaluate_rack_leave(m) * leave_weight
+
+		eval_score += _evaluate_defensive(m) * bonus_penalty
+
+		scored.append({
+			"word": m.word,
+			"row": m.row,
+			"col": m.col,
+			"horizontal": m.horizontal,
+			"score": m.score,
+			"tiles_placed": m.tiles_placed,
+			"rack_leave": m.rack_leave,
+			"eval_score": eval_score,
+		})
+
+	return scored
+
+
+func _evaluate_rack_leave(move) -> float:
+	var leave = move.rack_leave
+	var score := 0.0
+
+	if leave.length() == 0:
+		return 5.0
+
+	for c in leave:
+		match c:
+			"E", "R", "S", "N", "T", "I", "A", "U":
+				score += 1.0
+			"Q", "X", "Y", "J", "V":
+				score -= 1.5
+			"Ä", "Ö", "Ü", "C", "P", "F", "H", "K", "M", "W", "Z", "B", "D", "G", "L", "O":
+				score -= 0.5
+
+	var vowel_count := 0
+	var consonant_count := 0
+	for c in leave:
+		if c in "AEIOUÄÖÜ":
+			vowel_count += 1
+		else:
+			consonant_count += 1
+
+	if vowel_count >= 1 and consonant_count >= 1:
+		score += 1.0
+	elif vowel_count == 0 and leave.length() > 0:
+		score -= 1.0
+	elif consonant_count == 0 and leave.length() > 0:
+		score -= 0.5
+
+	return score
+
+
+func _evaluate_defensive(move) -> float:
+	var penalty := 0.0
+
+	for tp in move.tiles_placed:
+		var bonuses = [
+			Vector2i(tp.x - 1, tp.y - 1),
+			Vector2i(tp.x - 1, tp.y + 1),
+			Vector2i(tp.x + 1, tp.y - 1),
+			Vector2i(tp.x + 1, tp.y + 1),
+		]
+
+		for b in bonuses:
+			var bonus_type = _get_bonus_if_on_board(b.x, b.y)
+			if bonus_type == Board.BONUS_TW:
+				if not _is_vowel(move.word[tp.x - move.row if not move.horizontal else 0]):
+					penalty -= 2.0
+				else:
+					penalty -= 4.0
+			elif bonus_type == Board.BONUS_DW:
+				penalty -= 1.0
+
+	var high_score_ratio = float(move.score) / 50.0
+	if high_score_ratio > 0.5:
+		penalty += high_score_ratio * 5.0
+
+	return penalty
+
+
+func _is_vowel(c: String) -> bool:
+	return c in "AEIOUÄÖÜ"
+
+
+func _get_bonus_if_on_board(row: int, col: int) -> int:
+	return Board.get_bonus_at(row, col)
+
+
+func _make_pass_move() -> Dictionary:
+	return {
+		"word": "",
+		"row": -1,
+		"col": -1,
+		"horizontal": true,
+		"score": 0,
+		"tiles_placed": [],
+		"rack_leave": "",
+		"eval_score": 0.0,
+		"passed": true,
+	}
+
+------------------------------------------------------------------------
+FILE: scripts/ai/MoveGenerator.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/scripts/ai/MoveGenerator.gd
+------------------------------------------------------------------------
+extends RefCounted
+
+const Scoring = preload("res://scripts/game/Scoring.gd")
+
+class Move:
+	var word: String
+	var row: int
+	var col: int
+	var horizontal: bool
+	var score: int
+	var tiles_placed: Array
+	var rack_leave: String
+
+	func _init(w: String, r: int, c: int, h: bool, s: int, t: Array, rl: String):
+		word = w
+		row = r
+		col = c
+		horizontal = h
+		score = s
+		tiles_placed = t
+		rack_leave = rl
+
+	func _to_string() -> String:
+		return "Move(%s, %d, %d, h=%s, score=%d)" % [word, row, col, str(horizontal), score]
+
+
+var _move_keys: Dictionary = {}
+
+
+func generate_moves(board, rack: String, trie) -> Array:
+	_move_keys = {}
+	var moves: Array = []
+	var upper_rack = rack.to_upper()
+	var anchors = board.get_anchors()
+
+	for a in anchors:
+		_gen_direction(board, a.x, a.y, upper_rack, trie, moves, true)
+		_gen_direction(board, a.x, a.y, upper_rack, trie, moves, false)
+
+	_scoring_sort(moves)
+	return moves
+
+
+func _gen_direction(board, row: int, col: int, rack: String, trie, moves: Array, horizontal: bool) -> void:
+	var dr = 0 if horizontal else 1
+	var dc = 1 if horizontal else 0
+
+	var back_occ := 0
+	var r = row - dr
+	var c = col - dc
+	while r >= 0 and c >= 0 and r < 15 and c < 15 and board.is_occupied(r, c):
+		back_occ += 1
+		r -= dr
+		c -= dc
+
+	var back_emp := 0
+	while r >= 0 and c >= 0 and r < 15 and c < 15 and not board.is_occupied(r, c) and back_emp < rack.length():
+		back_emp += 1
+		r -= dr
+		c -= dc
+
+	for ext in range(back_emp + 1):
+		var start_r = row - back_occ * dr - ext * dr
+		var start_c = col - back_occ * dc - ext * dc
+		_go_direction(board, start_r, start_c, row, col, rack, trie, trie.root,
+				"", [], false, moves, horizontal)
+
+
+func _go_direction(board, row: int, col: int, anchor_row: int, anchor_col: int,
+		rack: String, trie, node,
+		word: String, tiles_placed: Array, placed_any: bool,
+		moves: Array, horizontal: bool) -> void:
+
+	var dr = 0 if horizontal else 1
+	var dc = 1 if horizontal else 0
+
+	var at_bound := (horizontal and col >= 15) or (not horizontal and row >= 15)
+	if at_bound:
+		if placed_any and node.is_end and board.is_move_connected(row, col, horizontal, tiles_placed):
+			_register_move(board, word, row, col, horizontal, tiles_placed, moves)
+		return
+
+	if board.is_occupied(row, col):
+		var letter = board.get_tile(row, col)
+		if node.children.has(letter):
+			_go_direction(board, row + dr, col + dc, anchor_row, anchor_col, rack, trie,
+					node.children[letter], word + letter, tiles_placed, placed_any, moves, horizontal)
+		return
+
+	if placed_any and node.is_end and board.is_move_connected(row, col, horizontal, tiles_placed):
+		_register_move(board, word, row, col, horizontal, tiles_placed, moves)
+
+	for i in range(rack.length()):
+		var letter = rack[i]
+		if not node.children.has(letter):
+			continue
+		if not _cross_check(board, row, col, letter, horizontal, trie):
+			continue
+		var new_rack = rack.left(i) + rack.substr(i + 1)
+		var new_positions = tiles_placed.duplicate()
+		new_positions.append(Vector2i(row, col))
+		_go_direction(board, row + dr, col + dc, anchor_row, anchor_col, new_rack, trie,
+				node.children[letter], word + letter, new_positions, true, moves, horizontal)
+
+	var anchor_pos = anchor_col if horizontal else anchor_row
+	var cur_pos = col if horizontal else row
+	if not placed_any and cur_pos < anchor_pos:
+		_go_direction(board, row + dr, col + dc, anchor_row, anchor_col, rack, trie,
+				node, word, tiles_placed, false, moves, horizontal)
+
+
+func _register_move(board, word: String, row: int, col: int,
+		horizontal: bool, tiles_placed: Array, moves: Array) -> void:
+
+	var dr = 0 if horizontal else 1
+	var dc = 1 if horizontal else 0
+
+	var start_r = row - dr
+	var start_c = col - dc
+	while _is_occupied_on_board_or_placed(board, start_r, start_c, tiles_placed):
+		start_r -= dr
+		start_c -= dc
+	start_r += dr
+	start_c += dc
+
+	var actual_word = ""
+	var r = start_r
+	var c = start_c
+	while _is_occupied_on_board_or_placed(board, r, c, tiles_placed):
+		if board.is_occupied(r, c):
+			actual_word += board.get_tile(r, c)
+		else:
+			var offset = (r - start_r) * dr + (c - start_c) * dc
+			actual_word += word[offset] if offset >= 0 and offset < word.length() else "?"
+		r += dr
+		c += dc
+
+	if actual_word != word:
+		return
+
+	var score = Scoring.calculate(board, word, start_r, start_c, horizontal, tiles_placed)
+	var move = Move.new(word, start_r, start_c, horizontal, score, tiles_placed, "")
+
+	var key = "%s_%d_%d_%s" % [move.word, move.row, move.col, str(move.horizontal)]
+	if not _move_keys.has(key):
+		_move_keys[key] = true
+		moves.append(move)
+
+
+func _is_occupied_on_board_or_placed(board, row: int, col: int, tiles_placed: Array) -> bool:
+	if board._is_on_board(row, col) and board.is_occupied(row, col):
+		return true
+	for tp in tiles_placed:
+		if tp.x == row and tp.y == col:
+			return true
+	return false
+
+
+func _cross_check(board, row: int, col: int, letter: String, is_horizontal: bool, trie) -> bool:
+	var dr = 1 if is_horizontal else 0
+	var dc = 0 if is_horizontal else 1
+
+	var has_perp := false
+	var cross := ""
+
+	var r = row - dr
+	var c = col - dc
+	while board._is_on_board(r, c) and board.is_occupied(r, c):
+		cross = board.get_tile(r, c) + cross
+		r -= dr
+		c -= dc
+		has_perp = true
+
+	cross += letter
+
+	r = row + dr
+	c = col + dc
+	while board._is_on_board(r, c) and board.is_occupied(r, c):
+		cross += board.get_tile(r, c)
+		r += dr
+		c += dc
+		has_perp = true
+
+	if not has_perp:
+		return true
+
+	if cross.length() == 1:
+		return true
+
+	return trie.search(cross)
+
+
+func _scoring_sort(moves: Array) -> void:
+	moves.sort_custom(_sort_by_score)
+
+
+func _sort_by_score(a: Move, b: Move) -> bool:
+	return a.score > b.score
+
+------------------------------------------------------------------------
+FILE: scripts/autoload/AudioManager.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/scripts/autoload/AudioManager.gd
+------------------------------------------------------------------------
+class_name AudioManager
+extends Node
+
+enum Bus { MASTER = 0, MUSIC = 1, EFFECTS = 2 }
+
+var _tween: Tween
+
+
+func _ready() -> void:
+	Settings.music_volume_changed.connect(_on_music_volume_changed)
+	Settings.effects_volume_changed.connect(_on_effects_volume_changed)
+	Settings.overall_volume_changed.connect(_on_overall_volume_changed)
+
+
+func play_sfx(sound: AudioStream, bus: Bus = Bus.EFFECTS) -> void:
+	var player := AudioStreamPlayer2D.new()
+	player.stream = sound
+	player.bus = _bus_name(bus)
+	player.finished.connect(player.queue_free)
+	add_child(player)
+	player.play()
+
+
+func play_music(sound: AudioStream, loop: bool = true) -> void:
+	var player := AudioStreamPlayer2D.new()
+	player.stream = sound
+	player.bus = _bus_name(Bus.MUSIC)
+	player.autoplay = true
+	player.finished.connect(_on_music_finished.bind(player, sound, loop))
+	add_child(player)
+	player.play()
+
+
+func set_bus_volume(bus: Bus, linear_value: float) -> void:
+	var db := linear_to_db(linear_value)
+	AudioServer.set_bus_volume_db(bus, db)
+	AudioServer.set_bus_mute(bus, linear_value < 0.01)
+
+
+func fade_out_music(duration: float = 1.0) -> void:
+	var bus_idx := Bus.MUSIC
+	var current := db_to_linear(AudioServer.get_bus_volume_db(bus_idx))
+	if _tween:
+		_tween.kill()
+	_tween = create_tween()
+	_tween.tween_method(_set_bus_volume_linear.bind(bus_idx), current, 0.0, duration)
+
+
+func _set_bus_volume_linear(value: float, bus: Bus) -> void:
+	var db := linear_to_db(value)
+	AudioServer.set_bus_volume_db(bus, db)
+	if value < 0.01:
+		AudioServer.set_bus_mute(bus, true)
+
+
+func _on_music_volume_changed(value: float) -> void:
+	set_bus_volume(Bus.MUSIC, value * Settings.overall_volume)
+
+
+func _on_effects_volume_changed(value: float) -> void:
+	set_bus_volume(Bus.EFFECTS, value * Settings.overall_volume)
+
+
+func _on_overall_volume_changed(value: float) -> void:
+	set_bus_volume(Bus.MUSIC, Settings.music_volume * value)
+	set_bus_volume(Bus.EFFECTS, Settings.effects_volume * value)
+
+
+func _on_music_finished(player: AudioStreamPlayer2D, stream: AudioStream, loop: bool) -> void:
+	if loop:
+		player.play()
+
+
+func _bus_name(bus: Bus) -> String:
+	match bus:
+		Bus.MASTER:
+			return "Master"
+		Bus.MUSIC:
+			return "Music"
+		Bus.EFFECTS:
+			return "Effects"
+	return "Master"
+
+------------------------------------------------------------------------
+FILE: scripts/autoload/SettingsManager.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/scripts/autoload/SettingsManager.gd
+------------------------------------------------------------------------
+class_name SettingsManager
+extends Node
+
+const SAVE_PATH := "user://settings.cfg"
+
+signal music_volume_changed(value: float)
+signal effects_volume_changed(value: float)
+signal overall_volume_changed(value: float)
+signal fps_changed(value: int)
+signal theme_changed(dark_mode: bool)
+
+var music_volume: float = 0.8:
+	set(value):
+		music_volume = clamp(value, 0.0, 1.0)
+		music_volume_changed.emit(music_volume)
+		save()
+
+var effects_volume: float = 0.8:
+	set(value):
+		effects_volume = clamp(value, 0.0, 1.0)
+		effects_volume_changed.emit(effects_volume)
+		save()
+
+var overall_volume: float = 1.0:
+	set(value):
+		overall_volume = clamp(value, 0.0, 1.0)
+		overall_volume_changed.emit(overall_volume)
+		save()
+
+var target_fps: int = 60:
+	set(value):
+		target_fps = value
+		Engine.max_fps = target_fps
+		fps_changed.emit(target_fps)
+		save()
+
+var dark_mode: bool = true:
+	set(value):
+		dark_mode = value
+		theme_changed.emit(dark_mode)
+		save()
+
+
+func _ready() -> void:
+	load_settings()
+	Engine.max_fps = target_fps
+
+
+func load_settings() -> void:
+	var cfg := ConfigFile.new()
+	var err := cfg.load(SAVE_PATH)
+	if err != OK:
+		return
+
+	music_volume = cfg.get_value("audio", "music_volume", 0.8)
+	effects_volume = cfg.get_value("audio", "effects_volume", 0.8)
+	overall_volume = cfg.get_value("audio", "overall_volume", 1.0)
+	target_fps = cfg.get_value("video", "target_fps", 60)
+	dark_mode = cfg.get_value("video", "dark_mode", true)
+
+
+func save() -> void:
+	var cfg := ConfigFile.new()
+	cfg.set_value("audio", "music_volume", music_volume)
+	cfg.set_value("audio", "effects_volume", effects_volume)
+	cfg.set_value("audio", "overall_volume", overall_volume)
+	cfg.set_value("video", "target_fps", target_fps)
+	cfg.set_value("video", "dark_mode", dark_mode)
+	cfg.save(SAVE_PATH)
+
+
+func reset_to_defaults() -> void:
+	music_volume = 0.8
+	effects_volume = 0.8
+	overall_volume = 1.0
+	target_fps = 60
+	dark_mode = true
+
+------------------------------------------------------------------------
+FILE: scripts/autoload/WordDictionary.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/scripts/autoload/WordDictionary.gd
+------------------------------------------------------------------------
+class_name WordDictionaryManager
+extends Node
+
+## Loads the German Scrabble word list into a Trie once at startup.
+## Shared by move validation ([method is_valid_word]) and the AI ([member trie]).
+
+signal dictionary_ready
+
+const Trie = preload("res://scripts/game/Trie.gd")
+const WORDLIST_PATH := "res://assets/dictionary/german_scrabble.txt"
+
+var trie: Trie
+var is_ready := false
+var word_count := 0
+
+
+func _ready() -> void:
+	trie = Trie.new()
+	var file := FileAccess.open(WORDLIST_PATH, FileAccess.READ)
+	if file:
+		for line in file.get_as_text().split("\n", false):
+			var word := line.strip_edges().to_upper()
+			if word.length() >= 2:
+				trie.insert(word)
+				word_count += 1
+		file.close()
+	else:
+		push_error("WordDictionary: could not open " + WORDLIST_PATH)
+		trie = null
+	is_ready = true
+	dictionary_ready.emit()
+
+
+func is_valid_word(word: String) -> bool:
+	return trie != null and trie.search(word.to_upper())
+
+------------------------------------------------------------------------
+FILE: scripts/game/Board.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/scripts/game/Board.gd
+------------------------------------------------------------------------
+class_name Board
+extends RefCounted
+
+const SIZE := 15
+
+const BONUS_NONE := 0
+const BONUS_DL := 1
+const BONUS_TL := 2
+const BONUS_DW := 3
+const BONUS_TW := 4
+
+const _BONUS_LAYOUT := [
+	[4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4],
+	[0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0],
+	[0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 3, 0, 0],
+	[1, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 1],
+	[0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0],
+	[0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0],
+	[0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0],
+	[4, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 4],
+	[0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0],
+	[0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0],
+	[0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0],
+	[1, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 1],
+	[0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 3, 0, 0],
+	[0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0],
+	[4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4],
+]
+
+var _cells: Array
+
+
+func _init():
+	_cells = []
+	for i in range(SIZE):
+		_cells.append([])
+		for j in range(SIZE):
+			_cells[i].append(null)
+
+
+func get_tile(row: int, col: int) -> String:
+	if not _is_on_board(row, col):
+		return ""
+	return _cells[row][col] if _cells[row][col] != null else ""
+
+
+func is_occupied(row: int, col: int) -> bool:
+	if not _is_on_board(row, col):
+		return false
+	return _cells[row][col] != null
+
+
+func is_empty_at(row: int, col: int) -> bool:
+	return not is_occupied(row, col)
+
+
+func place_tile(row: int, col: int, letter: String) -> void:
+	if _is_on_board(row, col):
+		_cells[row][col] = letter.to_upper()
+
+
+func remove_tile(row: int, col: int) -> void:
+	if _is_on_board(row, col):
+		_cells[row][col] = null
+
+
+func clear() -> void:
+	for i in range(SIZE):
+		for j in range(SIZE):
+			_cells[i][j] = null
+
+
+static func get_bonus_at(row: int, col: int) -> int:
+	if row < 0 or row >= SIZE or col < 0 or col >= SIZE:
+		return BONUS_NONE
+	return _BONUS_LAYOUT[row][col]
+
+
+func get_bonus(row: int, col: int) -> int:
+	return get_bonus_at(row, col)
+
+
+func get_center() -> Vector2i:
+	return Vector2i(7, 7)
+
+
+func _is_on_board(row: int, col: int) -> bool:
+	return row >= 0 and row < SIZE and col >= 0 and col < SIZE
+
+
+func is_first_move() -> bool:
+	for i in range(SIZE):
+		for j in range(SIZE):
+			if _cells[i][j] != null:
+				return false
+	return true
+
+
+func get_anchors() -> Array:
+	var anchors: Array = []
+	if is_first_move():
+		anchors.append(get_center())
+		return anchors
+
+	for r in range(SIZE):
+		for c in range(SIZE):
+			if _cells[r][c] != null:
+				continue
+			if _has_occupied_neighbor(r, c):
+				anchors.append(Vector2i(r, c))
+
+	return anchors
+
+
+func _has_occupied_neighbor(row: int, col: int) -> bool:
+	var dirs = [Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, -1), Vector2i(0, 1)]
+	for d in dirs:
+		var nr = row + d.x
+		var nc = col + d.y
+		if _is_on_board(nr, nc) and _cells[nr][nc] != null:
+			return true
+	return false
+
+
+func get_existing_word(row: int, col: int, horizontal: bool) -> Dictionary:
+	var word = ""
+	var start_row = row
+	var start_col = col
+	var positions: Array = []
+
+	if horizontal:
+		while start_col > 0 and _cells[row][start_col - 1] != null:
+			start_col -= 1
+		var c = start_col
+		while c < SIZE and _cells[row][c] != null:
+			word += _cells[row][c]
+			positions.append(Vector2i(row, c))
+			c += 1
+	else:
+		while start_row > 0 and _cells[start_row - 1][col] != null:
+			start_row -= 1
+		var r = start_row
+		while r < SIZE and _cells[r][col] != null:
+			word += _cells[r][col]
+			positions.append(Vector2i(r, col))
+			r += 1
+
+	return {
+		"word": word,
+		"row": start_row,
+		"col": start_col,
+		"positions": positions,
+	}
+
+
+func get_all_words(trie) -> Array:
+	var words: Array = []
+	var visited: Array = []
+	for i in range(SIZE):
+		visited.append([])
+		for j in range(SIZE):
+			visited[i].append(false)
+
+	for r in range(SIZE):
+		for c in range(SIZE):
+			if _cells[r][c] == null or visited[r][c]:
+				continue
+
+			if c + 1 < SIZE and _cells[r][c + 1] != null:
+				var w = get_existing_word(r, c, true)
+				if w.word.length() > 1:
+					words.append(w)
+					for p in w.positions:
+						visited[p.x][p.y] = true
+
+			if r + 1 < SIZE and _cells[r + 1][c] != null:
+				var w = get_existing_word(r, c, false)
+				if w.word.length() > 1:
+					words.append(w)
+					for p in w.positions:
+						visited[p.x][p.y] = true
+
+			if visited[r][c] == false:
+				visited[r][c] = true
+
+	return words
+
+
+func is_move_connected(move_row: int, move_col: int, move_horizontal: bool, tiles_placed: Array) -> bool:
+	if is_first_move():
+		var center = get_center()
+		for tp in tiles_placed:
+			if tp.x == center.x and tp.y == center.y:
+				return true
+		return false
+
+	for tp in tiles_placed:
+		var dirs = [Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, -1), Vector2i(0, 1)]
+		for d in dirs:
+			var nr = tp.x + d.x
+			var nc = tp.y + d.y
+			if _is_on_board(nr, nc) and _cells[nr][nc] != null:
+				return true
+
+	return false
+
+
+func duplicate():
+	var b = get_script().new()
+	for r in range(SIZE):
+		for c in range(SIZE):
+			if _cells[r][c] != null:
+				b._cells[r][c] = _cells[r][c]
+	return b
+
+
+func _to_string() -> String:
+	var result = ""
+	for r in range(SIZE):
+		for c in range(SIZE):
+			if _cells[r][c] != null:
+				result += _cells[r][c] + " "
+			else:
+				result += ". "
+		result += "\n"
+	return result
+
+------------------------------------------------------------------------
+FILE: scripts/game/Scoring.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/scripts/game/Scoring.gd
+------------------------------------------------------------------------
+class_name Scoring
+extends RefCounted
+
+const Board = preload("res://scripts/game/Board.gd")
+const Tiles = preload("res://scripts/game/Tiles.gd")
+
+
+static func calculate(board, word: String, row: int, col: int, horizontal: bool, tiles_placed: Array) -> int:
+	var dr = 0 if horizontal else 1
+	var dc = 1 if horizontal else 0
+	var total := 0
+	var word_multiplier := 1
+	var r = row
+	var c = col
+
+	for i in range(word.length()):
+		var letter = word[i]
+		var is_new = _is_position_in(tiles_placed, r, c)
+		var bonus = board.get_bonus(r, c) if is_new else Board.BONUS_NONE
+		var letter_value = Tiles.get_value(letter)
+
+		match bonus:
+			Board.BONUS_DL:
+				letter_value *= 2
+			Board.BONUS_TL:
+				letter_value *= 3
+			Board.BONUS_DW:
+				word_multiplier *= 2
+			Board.BONUS_TW:
+				word_multiplier *= 3
+
+		total += letter_value
+		r += dr
+		c += dc
+
+	total *= word_multiplier
+
+	var cross_score := 0
+	var nr = row
+	var nc = col
+	for i in range(word.length()):
+		if _is_position_in(tiles_placed, nr, nc):
+			cross_score += _calculate_cross(board, nr, nc, horizontal)
+		nr += dr
+		nc += dc
+
+	total += cross_score
+
+	if tiles_placed.size() == 7:
+		total += 50
+
+	return total
+
+
+static func _calculate_cross(board, row: int, col: int, horizontal: bool) -> int:
+	var perp_dr = 1 if horizontal else 0
+	var perp_dc = 0 if horizontal else 1
+
+	var r = row - perp_dr
+	var c = col - perp_dc
+	while r >= 0 and c >= 0 and r < Board.SIZE and c < Board.SIZE and board.is_occupied(r, c):
+		r -= perp_dr
+		c -= perp_dc
+
+	r += perp_dr
+	c += perp_dc
+
+	if not board.is_occupied(r, c):
+		return 0
+
+	var word := ""
+	var positions: Array = []
+	while r >= 0 and c >= 0 and r < Board.SIZE and c < Board.SIZE and board.is_occupied(r, c):
+		word += board.get_tile(r, c)
+		positions.append(Vector2i(r, c))
+		r += perp_dr
+		c += perp_dc
+
+	if word.length() < 2:
+		return 0
+
+	var score := 0
+	var word_mult := 1
+	for p in positions:
+		var lv = Tiles.get_value(board.get_tile(p.x, p.y))
+		var bonus = board.get_bonus(p.x, p.y)
+		match bonus:
+			Board.BONUS_DL:
+				lv *= 2
+			Board.BONUS_TL:
+				lv *= 3
+			Board.BONUS_DW:
+				word_mult *= 2
+			Board.BONUS_TW:
+				word_mult *= 3
+		score += lv
+	score *= word_mult
+	return score
+
+
+static func _is_position_in(positions: Array, row: int, col: int) -> bool:
+	for p in positions:
+		if p.x == row and p.y == col:
+			return true
+	return false
+
+------------------------------------------------------------------------
+FILE: scripts/game/TileBag.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/scripts/game/TileBag.gd
+------------------------------------------------------------------------
+class_name TileBag
+extends RefCounted
+
+const Tiles = preload("res://scripts/game/Tiles.gd")
+
+var _pool: Array[String]
+
+
+func _init():
+	_pool = []
+	for letter in Tiles.DISTRIBUTION:
+		var count = Tiles.DISTRIBUTION[letter]
+		for j in range(count):
+			_pool.append(letter)
+	_pool.shuffle()
+
+
+func draw_tile() -> String:
+	if _pool.is_empty():
+		return ""
+	return _pool.pop_back()
+
+
+func draw_tiles(count: int) -> String:
+	var result := ""
+	for i in range(count):
+		var t = draw_tile()
+		if t.is_empty():
+			break
+		result += t
+	return result
+
+
+func exchange(returned: String) -> String:
+	for c in returned:
+		_pool.append(c.to_upper())
+	_pool.shuffle()
+	return draw_tiles(returned.length())
+
+
+func remaining() -> int:
+	return _pool.size()
+
+
+func is_empty() -> bool:
+	return _pool.is_empty()
+
+
+func draw_balanced_tiles(count: int) -> String:
+	var vowels := "AEIOUÄÖÜ"
+	var result := ""
+	var vowel_count := 0
+	var consonant_count := 0
+
+	for i in range(count):
+		var tile = draw_tile()
+		if tile.is_empty():
+			break
+		result += tile
+		if vowels.contains(tile):
+			vowel_count += 1
+		else:
+			consonant_count += 1
+
+	if vowel_count >= 2 and consonant_count >= 2:
+		return result
+
+	for c in result:
+		_pool.append(c)
+	_pool.shuffle()
+
+	result = ""
+	vowel_count = 0
+	consonant_count = 0
+
+	for i in range(count):
+		var tile = draw_tile()
+		if tile.is_empty():
+			break
+		result += tile
+		if vowels.contains(tile):
+			vowel_count += 1
+		else:
+			consonant_count += 1
+
+	return result
+
+------------------------------------------------------------------------
+FILE: scripts/game/TileRack.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/scripts/game/TileRack.gd
+------------------------------------------------------------------------
+class_name TileRack
+extends RefCounted
+
+var _tiles: String
+
+
+func _init(tiles: String = ""):
+	_tiles = tiles.to_upper()
+
+
+func get_tiles() -> String:
+	return _tiles
+
+
+func set_tiles(tiles: String) -> void:
+	_tiles = tiles.to_upper()
+
+
+func size() -> int:
+	return _tiles.length()
+
+
+func has_tile(letter: String) -> bool:
+	return _tiles.find(letter.to_upper()) >= 0
+
+
+func add_tiles(tiles: String) -> void:
+	_tiles += tiles.to_upper()
+
+
+func remove_tiles(tiles_to_remove: String) -> bool:
+	var upper = tiles_to_remove.to_upper()
+	var temp = _tiles
+	for c in upper:
+		var idx = temp.find(c)
+		if idx >= 0:
+			temp = temp.left(idx) + temp.right(idx + 1)
+		else:
+			return false
+	_tiles = temp
+	return true
+
+
+func remove_letter(letter: String) -> bool:
+	var idx = _tiles.find(letter.to_upper())
+	if idx >= 0:
+		_tiles = _tiles.left(idx) + _tiles.right(idx + 1)
+		return true
+	return false
+
+
+func get_letters_as_array() -> Array:
+	var arr: Array = []
+	for i in range(_tiles.length()):
+		arr.append(_tiles[i])
+	return arr
+
+
+func count_letter(letter: String) -> int:
+	var upper = letter.to_upper()
+	var count := 0
+	for c in _tiles:
+		if c == upper:
+			count += 1
+	return count
+
+
+func is_empty() -> bool:
+	return _tiles.length() == 0
+
+
+func _to_string() -> String:
+	return _tiles
+
+------------------------------------------------------------------------
+FILE: scripts/game/Tiles.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/scripts/game/Tiles.gd
+------------------------------------------------------------------------
+class_name Tiles
+extends RefCounted
+
+const TILE_VALUES := {
+	"A": 1, "B": 3, "C": 4, "D": 1, "E": 1,
+	"F": 4, "G": 2, "H": 2, "I": 1, "J": 6,
+	"K": 4, "L": 2, "M": 3, "N": 1, "O": 2,
+	"P": 4, "Q": 10, "R": 1, "S": 1, "T": 1,
+	"U": 1, "V": 6, "W": 3, "X": 8, "Y": 10,
+	"Z": 3, "Ä": 6, "Ö": 8, "Ü": 6,
+}
+
+const DISTRIBUTION := {
+	"A": 5, "B": 2, "C": 2, "D": 4, "E": 15,
+	"F": 2, "G": 3, "H": 4, "I": 6, "J": 1,
+	"K": 2, "L": 3, "M": 4, "N": 9, "O": 3,
+	"P": 1, "Q": 1, "R": 6, "S": 7, "T": 6,
+	"U": 6, "V": 1, "W": 1, "X": 1, "Y": 1,
+	"Z": 2, "Ä": 1, "Ö": 1, "Ü": 1,
+}
+
+const TOTAL_TILES := 100
+
+
+static func get_value(letter: String) -> int:
+	return TILE_VALUES.get(letter.to_upper(), 0)
+
+
+static func get_rack_value(rack: String) -> int:
+	var total := 0
+	for c in rack:
+		total += get_value(c)
+	return total
+
+------------------------------------------------------------------------
+FILE: scripts/game/Trie.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/scripts/game/Trie.gd
+------------------------------------------------------------------------
+class_name Trie
+extends RefCounted
+
+class TrieNode:
+	var children: Dictionary
+	var is_end: bool
+
+	func _init():
+		children = {}
+		is_end = false
+
+
+var root: TrieNode
+
+
+func _init():
+	root = TrieNode.new()
+
+
+func insert(word: String) -> void:
+	var node = root
+	for c in word:
+		if not node.children.has(c):
+			node.children[c] = TrieNode.new()
+		node = node.children[c]
+	node.is_end = true
+
+
+func search(word: String) -> bool:
+	var node = _traverse(word)
+	return node != null and node.is_end
+
+
+func starts_with(prefix: String) -> bool:
+	var node = _traverse(prefix)
+	return node != null
+
+
+func get_node(prefix: String) -> TrieNode:
+	return _traverse(prefix)
+
+
+func count_words() -> int:
+	var count := 0
+	_count_from(root, count)
+	return count
+
+
+func _count_from(node: TrieNode, count: int) -> void:
+	if node.is_end:
+		count += 1
+	for child in node.children.values():
+		_count_from(child, count)
+
+
+func _traverse(s: String) -> TrieNode:
+	var node = root
+	for c in s:
+		if not node.children.has(c):
+			return null
+		node = node.children[c]
+	return node
+
+------------------------------------------------------------------------
+FILE: scripts/ui/BoardDisplay.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/scripts/ui/BoardDisplay.gd
+------------------------------------------------------------------------
+class_name BoardDisplay
+extends Control
+
+signal cell_clicked(row: int, col: int)
+
+const Board = preload("res://scripts/game/Board.gd")
+const Tiles = preload("res://scripts/game/Tiles.gd")
+
+var _bonus_colors: Dictionary = {}
+var _tile_color: Color
+var _preview_color: Color
+var _placed_marker_color: Color
+var _tile_letter_color: Color
+var _tile_value_color: Color
+var _grid_color: Color
+
+var _cell_containers: Array
+var _cell_bg: Array
+var _cell_letter: Array
+var _cell_value: Array
+var _cell_placed_marker: Array
+var _cell_bonus_label: Array
+var _cell_size: float = 0.0
+var _board_ref: Board = null
+var _bonus_board: Board = null
+var _built: bool = false
+var _last_preview: Array = []
+var _grid_bg: ColorRect = null
+
+
+func _ready():
+	_bonus_board = Board.new()
+	apply_theme(Settings.dark_mode)
+	Settings.theme_changed.connect(apply_theme)
+
+
+func apply_theme(dark: bool):
+	if dark:
+		_bonus_colors = {
+			Board.BONUS_NONE: Color(0.20, 0.20, 0.34, 1),
+			Board.BONUS_DL:   Color(0.15, 0.50, 0.55, 1),
+			Board.BONUS_TL:   Color(0.20, 0.38, 0.78, 1),
+			Board.BONUS_DW:   Color(0.78, 0.28, 0.28, 1),
+			Board.BONUS_TW:   Color(0.72, 0.12, 0.20, 1),
+		}
+		_tile_color          = Color(0.95, 0.92, 0.78, 1)
+		_preview_color       = Color(0.95, 0.92, 0.60, 1)
+		_placed_marker_color = Color(0.91, 0.27, 0.38, 0.55)
+		_tile_letter_color   = Color(0.10, 0.08, 0.06, 1)
+		_tile_value_color    = Color(0.30, 0.25, 0.18, 1)
+		_grid_color          = Color(0.04, 0.04, 0.08, 1)
+	else:
+		_bonus_colors = {
+			Board.BONUS_NONE: Color(0.78, 0.72, 0.56, 1),
+			Board.BONUS_DL:   Color(0.65, 0.82, 0.90, 1),
+			Board.BONUS_TL:   Color(0.18, 0.40, 0.72, 1),
+			Board.BONUS_DW:   Color(0.96, 0.68, 0.70, 1),
+			Board.BONUS_TW:   Color(0.80, 0.12, 0.15, 1),
+		}
+		_tile_color          = Color(0.98, 0.95, 0.84, 1)
+		_preview_color       = Color(0.95, 0.92, 0.68, 1)
+		_placed_marker_color = Color(0.80, 0.12, 0.15, 0.55)
+		_tile_letter_color   = Color(0.08, 0.06, 0.04, 1)
+		_tile_value_color    = Color(0.30, 0.25, 0.15, 1)
+		_grid_color          = Color(0.38, 0.33, 0.22, 1)
+
+	if _grid_bg != null:
+		_grid_bg.color = _grid_color
+
+	if _built:
+		if _board_ref != null:
+			display(_board_ref, _last_preview)
+		else:
+			for r in range(Board.SIZE):
+				for c in range(Board.SIZE):
+					var bonus = _bonus_board.get_bonus(r, c)
+					_cell_bg[r][c].color = _bonus_colors.get(bonus, _bonus_colors[Board.BONUS_NONE])
+
+
+func _ensure_built():
+	if _built:
+		return
+	_built = true
+
+	var s = min(size.x, size.y)
+	if s <= 0:
+		s = 1020
+
+	_cell_size = s / Board.SIZE
+
+	_grid_bg = ColorRect.new()
+	_grid_bg.name = "GridBG"
+	_grid_bg.position = Vector2.ZERO
+	_grid_bg.size = Vector2(s, s)
+	_grid_bg.color = _grid_color
+	add_child(_grid_bg)
+
+	_cell_containers = []
+	_cell_bg = []
+	_cell_letter = []
+	_cell_value = []
+	_cell_placed_marker = []
+	_cell_bonus_label = []
+
+	for r in range(Board.SIZE):
+		_cell_containers.append([])
+		_cell_bg.append([])
+		_cell_letter.append([])
+		_cell_value.append([])
+		_cell_placed_marker.append([])
+		_cell_bonus_label.append([])
+
+		for c in range(Board.SIZE):
+			var cell = _create_cell(r, c)
+			add_child(cell)
+			_cell_containers[r].append(cell)
+
+
+func _create_cell(row: int, col: int) -> Control:
+	var cell = Control.new()
+	cell.position = Vector2(col * _cell_size, row * _cell_size)
+	cell.size = Vector2(_cell_size, _cell_size)
+	cell.mouse_filter = Control.MOUSE_FILTER_STOP
+	cell.gui_input.connect(func(event):
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			cell_clicked.emit(row, col)
+	)
+
+	var bg = ColorRect.new()
+	bg.name = "BG"
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bg.position = Vector2(1, 1)
+	bg.size = Vector2(_cell_size - 2, _cell_size - 2)
+	var bonus = _bonus_board.get_bonus(row, col)
+	bg.color = _bonus_colors.get(bonus, _bonus_colors[Board.BONUS_NONE])
+	cell.add_child(bg)
+	_cell_bg[row].append(bg)
+
+	var marker = ColorRect.new()
+	marker.name = "Marker"
+	marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	marker.position = Vector2(1, 1)
+	marker.size = Vector2(_cell_size - 2, _cell_size - 2)
+	marker.color = _placed_marker_color
+	marker.visible = false
+	cell.add_child(marker)
+	_cell_placed_marker[row].append(marker)
+
+	var letter_label = Label.new()
+	letter_label.name = "Letter"
+	letter_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	letter_label.position = Vector2.ZERO
+	letter_label.size = Vector2(_cell_size, _cell_size)
+	letter_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	letter_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	letter_label.add_theme_font_size_override("font_size", _cell_size * 0.45)
+	letter_label.add_theme_color_override("font_color", _tile_letter_color)
+	letter_label.visible = false
+	cell.add_child(letter_label)
+	_cell_letter[row].append(letter_label)
+
+	var value_label = Label.new()
+	value_label.name = "Value"
+	value_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	value_label.position = Vector2(_cell_size * 0.55, _cell_size * 0.6)
+	value_label.size = Vector2(_cell_size * 0.4, _cell_size * 0.35)
+	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	value_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	value_label.add_theme_font_size_override("font_size", _cell_size * 0.17)
+	value_label.add_theme_color_override("font_color", _tile_value_color)
+	value_label.visible = false
+	cell.add_child(value_label)
+	_cell_value[row].append(value_label)
+
+	var bonus_label = Label.new()
+	bonus_label.name = "Bonus"
+	bonus_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bonus_label.position = Vector2.ZERO
+	bonus_label.size = Vector2(_cell_size, _cell_size)
+	bonus_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	bonus_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	bonus_label.add_theme_font_size_override("font_size", _cell_size * 0.22)
+	bonus_label.add_theme_color_override("font_color", Color.WHITE)
+	bonus_label.visible = false
+	cell.add_child(bonus_label)
+	_cell_bonus_label[row].append(bonus_label)
+
+	return cell
+
+
+func display(board: Board, preview_placements: Array = []):
+	_ensure_built()
+	_board_ref = board
+	_last_preview = preview_placements.duplicate()
+	var preview_set = {}
+	for p in preview_placements:
+		preview_set[Vector2i(p.x, p.y)] = true
+
+	for r in range(Board.SIZE):
+		for c in range(Board.SIZE):
+			var letter = board.get_tile(r, c)
+			var is_preview = preview_set.has(Vector2i(r, c))
+
+			if letter.is_empty() and not is_preview:
+				_cell_letter[r][c].visible = false
+				_cell_value[r][c].visible = false
+				_cell_placed_marker[r][c].visible = false
+				_cell_bg[r][c].color = _bonus_colors.get(
+					_bonus_board.get_bonus(r, c),
+					_bonus_colors[Board.BONUS_NONE]
+				)
+				_show_bonus_label(r, c)
+			else:
+				_cell_bonus_label[r][c].visible = false
+				var display_letter = letter if not letter.is_empty() else "?"
+				_cell_letter[r][c].text = display_letter
+				_cell_letter[r][c].add_theme_color_override("font_color", _tile_letter_color)
+				_cell_letter[r][c].visible = true
+				_cell_value[r][c].text = str(Tiles.get_value(display_letter))
+				_cell_value[r][c].add_theme_color_override("font_color", _tile_value_color)
+				_cell_value[r][c].visible = true
+				_cell_bg[r][c].color = _preview_color if is_preview else _tile_color
+				_cell_placed_marker[r][c].color = _placed_marker_color
+				_cell_placed_marker[r][c].visible = is_preview
+
+
+func highlight_cells(positions: Array, highlight: bool = true):
+	_ensure_built()
+	for p in positions:
+		if p.x >= 0 and p.x < Board.SIZE and p.y >= 0 and p.y < Board.SIZE:
+			_cell_placed_marker[p.x][p.y].visible = highlight
+
+
+func get_cell_center(row: int, col: int) -> Vector2:
+	return Vector2(col * _cell_size + _cell_size / 2, row * _cell_size + _cell_size / 2)
+
+
+func _show_bonus_label(row: int, col: int):
+	var bonus = _bonus_board.get_bonus(row, col)
+	var label_text := ""
+
+	match bonus:
+		Board.BONUS_DL:
+			label_text = "DL"
+		Board.BONUS_TL:
+			label_text = "TL"
+		Board.BONUS_DW:
+			label_text = "DW"
+		Board.BONUS_TW:
+			label_text = "TW"
+
+	if label_text.is_empty():
+		_cell_bonus_label[row][col].visible = false
+	else:
+		_cell_bonus_label[row][col].text = label_text
+		_cell_bonus_label[row][col].visible = true
+
+------------------------------------------------------------------------
+FILE: scripts/ui/Game.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/scripts/ui/Game.gd
+------------------------------------------------------------------------
+extends Control
+
+enum GameState { DIFFICULTY_SELECT, HUMAN_TURN, AI_THINKING, GAME_OVER }
+
+const Board = preload("res://scripts/game/Board.gd")
+const Tiles = preload("res://scripts/game/Tiles.gd")
+const TileRack = preload("res://scripts/game/TileRack.gd")
+const TileBag = preload("res://scripts/game/TileBag.gd")
+const Scoring = preload("res://scripts/game/Scoring.gd")
+const MoveGenerator = preload("res://scripts/ai/MoveGenerator.gd")
+const AIPlayer = preload("res://scripts/ai/AIPlayer.gd")
+
+var _state: int = GameState.DIFFICULTY_SELECT
+var _difficulty: int = AIPlayer.Difficulty.HARD
+var _board: Board
+var _bag: TileBag
+var _human_rack: TileRack
+var _ai_rack: TileRack
+var _human_score: int = 0
+var _ai_score: int = 0
+var _consecutive_passes: int = 0
+var _ai_player: AIPlayer
+var _selected_rack_index: int = -1
+var _placed_rack_indices: Array[int] = []
+var _pending_placements: Array[Dictionary] = []
+var _exchange_mode: bool = false
+
+@onready var difficulty_panel: Panel = %DifficultyPanel
+@onready var easy_button: Button = %EasyButton
+@onready var medium_button: Button = %MediumButton
+@onready var hard_button: Button = %HardButton
+@onready var game_ui: Control = %GameUI
+@onready var board_container: Control = %BoardContainer
+@onready var board_display = %BoardDisplay
+@onready var rack_display = %RackDisplay
+@onready var player_score_label: Label = %PlayerScore
+@onready var ai_score_label: Label = %AIScore
+@onready var status_label: Label = %StatusLabel
+@onready var submit_button: Button = %SubmitButton
+@onready var pass_button: Button = %PassButton
+@onready var exchange_button: Button = %ExchangeButton
+@onready var menu_button: Button = %MenuButton
+@onready var game_overlay = %GameOverOverlay
+@onready var theme_button: Button = %ThemeButton
+@onready var background: ColorRect = $Background
+
+
+func _ready():
+	difficulty_panel.visible = true
+	game_ui.visible = false
+	game_overlay.visible = false
+
+	easy_button.pressed.connect(func(): _on_difficulty_selected(AIPlayer.Difficulty.EASY))
+	medium_button.pressed.connect(func(): _on_difficulty_selected(AIPlayer.Difficulty.MEDIUM))
+	hard_button.pressed.connect(func(): _on_difficulty_selected(AIPlayer.Difficulty.HARD))
+
+	board_display.cell_clicked.connect(_on_board_cell_clicked)
+	rack_display.tile_selected.connect(_on_rack_tile_selected)
+	rack_display.tile_deselected.connect(_on_rack_tile_deselected)
+	rack_display.placed_tile_clicked.connect(_on_placed_tile_clicked)
+	submit_button.pressed.connect(_on_submit)
+	pass_button.pressed.connect(_on_pass)
+	exchange_button.pressed.connect(_on_exchange)
+	menu_button.pressed.connect(_on_main_menu)
+	theme_button.pressed.connect(_on_theme_toggle)
+	game_overlay.play_again_pressed.connect(_on_play_again)
+	game_overlay.main_menu_pressed.connect(_on_main_menu)
+	Settings.theme_changed.connect(_on_theme_changed)
+
+	_apply_background(Settings.dark_mode)
+	_update_theme_button(Settings.dark_mode)
+	_resize_board()
+
+
+func _resize_board():
+	await get_tree().process_frame
+	var size = min(board_container.size.x, board_container.size.y)
+	board_display.custom_minimum_size = Vector2(size, size)
+	board_display.size = Vector2(size, size)
+	board_display.position = Vector2(
+		(board_container.size.x - size) / 2,
+		(board_container.size.y - size) / 2
+	)
+
+
+func _is_word_valid(word: String) -> bool:
+	return WordDict.is_valid_word(word)
+
+
+func _on_difficulty_selected(diff: int):
+	_difficulty = diff
+	difficulty_panel.visible = false
+	game_ui.visible = true
+	await _resize_board()
+	_start_game()
+
+
+func _start_game():
+	_board = Board.new()
+	_bag = TileBag.new()
+	_human_rack = TileRack.new(_bag.draw_balanced_tiles(7))
+	_ai_rack = TileRack.new(_bag.draw_balanced_tiles(7))
+	_human_score = 0
+	_ai_score = 0
+	_consecutive_passes = 0
+	_pending_placements = []
+	_placed_rack_indices = []
+	_selected_rack_index = -1
+	_exchange_mode = false
+
+	var mg = MoveGenerator.new()
+	_ai_player = AIPlayer.new(_difficulty, mg, WordDict.trie)
+
+	_update_display()
+	_start_human_turn()
+
+
+func _start_human_turn():
+	_state = GameState.HUMAN_TURN
+	_pending_placements = []
+	_placed_rack_indices = []
+	_selected_rack_index = -1
+	_exchange_mode = false
+	rack_display.set_exchange_mode(false)
+	rack_display.clear_selection()
+	_set_status("Your turn")
+	_update_display()
+
+
+func _start_ai_turn():
+	_state = GameState.AI_THINKING
+	_set_status("AI thinking...")
+	rack_display.clear_selection()
+	submit_button.disabled = true
+	pass_button.disabled = true
+	exchange_button.disabled = true
+
+	await get_tree().create_timer(0.3).timeout
+
+	var move = _ai_player.choose_move(_board, _ai_rack.get_tiles())
+
+	if move.get("passed", false):
+		_consecutive_passes += 1
+		_set_status("AI passed")
+		await get_tree().create_timer(0.8).timeout
+	else:
+		_consecutive_passes = 0
+		var word = move.word
+		var row = move.row
+		var col = move.col
+		var horizontal = move.horizontal
+		var tiles_placed = move.tiles_placed
+		var score = move.score
+
+		for tp in tiles_placed:
+			var idx = (tp.y - col) if horizontal else (tp.x - row)
+			if idx >= 0 and idx < word.length():
+				_board.place_tile(tp.x, tp.y, word[idx])
+
+		for tp in tiles_placed:
+			var idx = (tp.y - col) if horizontal else (tp.x - row)
+			if idx >= 0 and idx < word.length():
+				_ai_rack.remove_letter(word[idx])
+
+		_ai_score += score
+		_set_status("AI played \"%s\" for %d" % [word, score])
+		_draw_ai_tiles()
+
+		await get_tree().create_timer(1.2).timeout
+
+	_update_display()
+
+	if await _check_end_game():
+		return
+
+	_start_human_turn()
+
+
+func _draw_human_tiles():
+	var needed = 7 - _human_rack.size()
+	if needed > 0:
+		var drawn = _bag.draw_tiles(needed)
+		_human_rack.add_tiles(drawn)
+
+
+func _draw_ai_tiles():
+	var needed = 7 - _ai_rack.size()
+	if needed > 0:
+		var drawn = _bag.draw_tiles(needed)
+		_ai_rack.add_tiles(drawn)
+
+
+func _apply_human_move(result: Dictionary):
+	var word = result.word
+	var row = result.row
+	var col = result.col
+	var horizontal = result.horizontal
+	var score = result.score
+
+	for pp in _pending_placements:
+		_board.place_tile(pp.pos.x, pp.pos.y, pp.letter)
+		_human_rack.remove_letter(pp.letter)
+
+	_human_score += score
+	_pending_placements = []
+	_placed_rack_indices = []
+	_selected_rack_index = -1
+	_consecutive_passes = 0
+	_set_status("\"%s\" scores %d!" % [word, score])
+	_draw_human_tiles()
+	_update_display()
+
+	await get_tree().create_timer(0.8).timeout
+
+	if await _check_end_game():
+		return
+
+	_start_ai_turn()
+
+
+func _check_end_game() -> bool:
+	if _consecutive_passes >= 6:
+		_end_game("Both players passed 3 times! Game over.")
+		return true
+
+	var human_empty = _human_rack.is_empty()
+	var ai_empty = _ai_rack.is_empty()
+
+	if human_empty:
+		var bonus = Tiles.get_rack_value(_ai_rack.get_tiles())
+		_human_score += bonus
+		_set_status("You used all your tiles! +%d bonus" % bonus)
+		_update_display()
+		await get_tree().create_timer(0.8).timeout
+		_end_game("You win! %d - %d" % [_human_score, _ai_score])
+		return true
+
+	if ai_empty:
+		var bonus = Tiles.get_rack_value(_human_rack.get_tiles())
+		_ai_score += bonus
+		_set_status("AI used all its tiles! +%d bonus" % bonus)
+		_update_display()
+		await get_tree().create_timer(0.8).timeout
+		_end_game("AI wins! %d - %d" % [_ai_score, _human_score])
+		return true
+
+	return false
+
+
+func _end_game(reason: String):
+	_state = GameState.GAME_OVER
+	_set_status(reason)
+	submit_button.disabled = true
+	pass_button.disabled = true
+	exchange_button.disabled = true
+	rack_display.set_exchange_mode(false)
+
+	if _human_score > _ai_score:
+		_set_status("You win! %d - %d" % [_human_score, _ai_score])
+	elif _ai_score > _human_score:
+		_set_status("AI wins! %d - %d" % [_human_score, _ai_score])
+	else:
+		_set_status("Tie! %d - %d" % [_human_score, _ai_score])
+
+	await get_tree().create_timer(0.5).timeout
+	game_overlay.show_scores(_human_score, _ai_score)
+
+
+func _on_board_cell_clicked(row: int, col: int):
+	if _state != GameState.HUMAN_TURN:
+		return
+	if _exchange_mode:
+		return
+	if _board.is_occupied(row, col):
+		return
+
+	var pending_idx = _get_pending_idx(row, col)
+	if pending_idx >= 0:
+		var pp = _pending_placements[pending_idx]
+		_placed_rack_indices.erase(pp.rack_index)
+		_pending_placements.remove_at(pending_idx)
+		_selected_rack_index = -1
+		rack_display.clear_selection()
+		_update_display()
+		return
+
+	if _selected_rack_index < 0:
+		return
+
+	if _placed_rack_indices.has(_selected_rack_index):
+		return
+
+	_pending_placements.append({
+		pos = Vector2i(row, col),
+		letter = _human_rack.get_tiles()[_selected_rack_index],
+		rack_index = _selected_rack_index,
+	})
+	_placed_rack_indices.append(_selected_rack_index)
+	_selected_rack_index = -1
+	rack_display.clear_selection()
+	_update_display()
+
+
+func _on_rack_tile_selected(index: int):
+	if _state != GameState.HUMAN_TURN:
+		return
+	if _placed_rack_indices.has(index):
+		return
+	if _exchange_mode:
+		rack_display.toggle_exchange_index(index)
+		_update_display()
+		return
+	_selected_rack_index = index
+
+
+func _on_rack_tile_deselected():
+	if _state != GameState.HUMAN_TURN:
+		return
+	if not _exchange_mode:
+		_selected_rack_index = -1
+
+
+func _on_placed_tile_clicked(index: int):
+	if _state != GameState.HUMAN_TURN:
+		return
+
+	var rack_str = _human_rack.get_tiles()
+	var letter = rack_str[index] if index < rack_str.length() else ""
+	if letter.is_empty():
+		return
+
+	for i in range(_pending_placements.size() - 1, -1, -1):
+		if _pending_placements[i].rack_index == index:
+			_pending_placements.remove_at(i)
+
+	_placed_rack_indices.erase(index)
+	_update_display()
+
+
+func _on_submit():
+	if _state != GameState.HUMAN_TURN:
+		return
+	if _pending_placements.is_empty():
+		_set_status("Place tiles on the board first")
+		return
+
+	var result = _validate_move()
+	if not result.valid:
+		_set_status(result.reason)
+		return
+
+	_apply_human_move(result)
+
+
+func _on_pass():
+	if _state != GameState.HUMAN_TURN:
+		return
+
+	_consecutive_passes += 1
+	_pending_placements = []
+	_placed_rack_indices = []
+	_selected_rack_index = -1
+	rack_display.clear_selection()
+	_set_status("You passed")
+
+	if await _check_end_game():
+		return
+
+	_start_ai_turn()
+
+
+func _on_exchange():
+	if _state != GameState.HUMAN_TURN:
+		return
+
+	if not _exchange_mode:
+		if _bag.is_empty():
+			_set_status("No tiles left in the bag to exchange")
+			return
+		_exchange_mode = true
+		rack_display.set_exchange_mode(true)
+		_set_status("Select tiles to exchange, then click Exchange again")
+		_update_display()
+		return
+
+	var exchange_indices = rack_display.get_exchange_indices()
+	if exchange_indices.is_empty():
+		_exchange_mode = false
+		rack_display.set_exchange_mode(false)
+		_set_status("Exchange cancelled")
+		_update_display()
+		return
+
+	var exchange_letters := ""
+	var indices = exchange_indices.duplicate()
+	indices.sort()
+	indices.reverse()
+
+	for i in indices:
+		var rack_str = _human_rack.get_tiles()
+		if i < rack_str.length():
+			exchange_letters += rack_str[i]
+
+	for c in exchange_letters:
+		_human_rack.remove_letter(c)
+
+	var new_tiles = _bag.exchange(exchange_letters)
+	_human_rack.add_tiles(new_tiles)
+
+	_exchange_mode = false
+	rack_display.set_exchange_mode(false)
+	_set_status("Exchanged %d tiles" % exchange_letters.length())
+	_update_display()
+
+	if await _check_end_game():
+		return
+
+	_start_ai_turn()
+
+
+func _validate_move() -> Dictionary:
+	var tiles = _pending_placements
+	if tiles.is_empty():
+		return {valid = false, reason = "No tiles placed"}
+
+	var positions: Array[Vector2i] = []
+	for t in tiles:
+		positions.append(t.pos)
+
+	var rows := {}
+	var cols := {}
+	for p in positions:
+		rows[p.x] = true
+		cols[p.y] = true
+
+	var horizontal := rows.size() == 1
+	var vertical := cols.size() == 1
+
+	if not horizontal and not vertical:
+		return {valid = false, reason = "Tiles must be in a single row or column"}
+
+	if horizontal and vertical and positions.size() == 1:
+		horizontal = true
+
+	var sorted = positions.duplicate()
+	var fail_reason := ""
+
+	if horizontal:
+		sorted.sort_custom(func(a, b): return a.y < b.y)
+		var row = sorted[0].x
+		for i in range(1, sorted.size()):
+			for gap in range(sorted[i - 1].y + 1, sorted[i].y):
+				if _board.is_empty_at(row, gap):
+					fail_reason = "No gaps allowed between placed tiles"
+					break
+			if not fail_reason.is_empty():
+				break
+	else:
+		sorted.sort_custom(func(a, b): return a.x < b.x)
+		var col = sorted[0].y
+		for i in range(1, sorted.size()):
+			for gap in range(sorted[i - 1].x + 1, sorted[i].x):
+				if _board.is_empty_at(gap, col):
+					fail_reason = "No gaps allowed between placed tiles"
+					break
+			if not fail_reason.is_empty():
+				break
+
+	if fail_reason.is_empty() and not _board.is_move_connected(sorted[0].x, sorted[0].y, horizontal, positions):
+		fail_reason = "Word must connect to existing tiles on the board"
+
+	var temp: Board = null
+	if fail_reason.is_empty():
+		temp = _board.duplicate()
+		for t in tiles:
+			temp.place_tile(t.pos.x, t.pos.y, t.letter)
+
+		var start_row: int = sorted[0].x
+		var start_col: int = sorted[0].y
+
+		if horizontal:
+			while start_col > 0 and temp.is_occupied(start_row, start_col - 1):
+				start_col -= 1
+		else:
+			while start_row > 0 and temp.is_occupied(start_row - 1, start_col):
+				start_row -= 1
+
+		var main_word = temp.get_existing_word(start_row, start_col, horizontal)
+		if main_word.word.length() < 2:
+			fail_reason = "Word must be at least 2 letters long"
+		elif not _is_word_valid(main_word.word):
+			fail_reason = "\"%s\" is not a valid word" % main_word.word
+		else:
+			for t in tiles:
+				var cross = temp.get_existing_word(t.pos.x, t.pos.y, not horizontal)
+				if cross.word.length() > 1 and not _is_word_valid(cross.word):
+					fail_reason = "\"%s\" is not a valid word" % cross.word
+					break
+
+			if fail_reason.is_empty():
+				var tiles_placed_arr: Array[Vector2i] = []
+				for t in tiles:
+					tiles_placed_arr.append(t.pos)
+
+				var score = Scoring.calculate(temp, main_word.word, main_word.row, main_word.col, horizontal, tiles_placed_arr)
+
+				return {
+					valid = true,
+					word = main_word.word,
+					row = main_word.row,
+					col = main_word.col,
+					horizontal = horizontal,
+					score = score,
+					tiles_placed = tiles_placed_arr,
+				}
+
+	return {valid = false, reason = fail_reason}
+
+
+func _get_pending_idx(row: int, col: int) -> int:
+	for i in range(_pending_placements.size()):
+		if _pending_placements[i].pos.x == row and _pending_placements[i].pos.y == col:
+			return i
+	return -1
+
+
+func _update_display():
+	var preview_board = _board.duplicate()
+	for pp in _pending_placements:
+		preview_board.place_tile(pp.pos.x, pp.pos.y, pp.letter)
+	board_display.display(preview_board, _get_pending_positions())
+	rack_display.display(
+		_human_rack.get_tiles(),
+		_selected_rack_index,
+		_placed_rack_indices
+	)
+
+	player_score_label.text = "You: %d" % _human_score
+	ai_score_label.text = "AI: %d" % _ai_score
+
+	submit_button.disabled = not (_state == GameState.HUMAN_TURN and not _pending_placements.is_empty())
+	pass_button.disabled = _state != GameState.HUMAN_TURN
+	exchange_button.disabled = _state != GameState.HUMAN_TURN
+
+	var exchange_count = rack_display.get_exchange_indices().size() if _exchange_mode else 0
+	if _exchange_mode:
+		exchange_button.text = "Confirm (%d)" % exchange_count
+	else:
+		exchange_button.text = "Exchange"
+
+
+func _get_pending_positions() -> Array:
+	var result: Array[Vector2i] = []
+	for pp in _pending_placements:
+		result.append(pp.pos)
+	return result
+
+
+func _set_status(msg: String):
+	status_label.text = msg
+
+
+func _on_play_again():
+	game_overlay.hide()
+	_start_game()
+
+
+func _on_theme_toggle():
+	Settings.dark_mode = not Settings.dark_mode
+
+
+func _on_theme_changed(dark: bool):
+	_apply_background(dark)
+	_update_theme_button(dark)
+
+
+func _apply_background(dark: bool):
+	background.color = Color(0.07, 0.07, 0.12, 1) if dark else Color(0.88, 0.84, 0.74, 1)
+
+
+func _update_theme_button(dark: bool):
+	theme_button.text = "LIGHT" if dark else "DARK"
+
+
+func _on_main_menu():
+	get_tree().change_scene_to_file("res://scenes/main_menu/MainMenu.tscn")
+
+------------------------------------------------------------------------
+FILE: scripts/ui/GameOverOverlay.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/scripts/ui/GameOverOverlay.gd
+------------------------------------------------------------------------
+class_name GameOverOverlay
+extends Control
+
+signal play_again_pressed
+signal main_menu_pressed
+
+
+func _ready():
+	visible = false
+
+
+func show_scores(human_score: int, ai_score: int, human_name: String = "You", ai_name: String = "AI"):
+	visible = true
+
+	var title_label = %GameOverTitle as Label
+	var scores_label = %FinalScores as Label
+	var winner_label = %WinnerLabel as Label
+
+	scores_label.text = "%s: %d\n%s: %d" % [human_name, human_score, ai_name, ai_score]
+
+	if human_score > ai_score:
+		winner_label.text = "%s wins!" % human_name
+		winner_label.add_theme_color_override("font_color", Color(0.3, 0.9, 0.3, 1))
+	elif ai_score > human_score:
+		winner_label.text = "%s wins!" % ai_name
+		winner_label.add_theme_color_override("font_color", Color(0.91, 0.27, 0.38, 1))
+	else:
+		winner_label.text = "It's a tie!"
+		winner_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.3, 1))
+
+
+func _on_play_again():
+	play_again_pressed.emit()
+
+
+func _on_main_menu():
+	main_menu_pressed.emit()
+
+------------------------------------------------------------------------
+FILE: scripts/ui/MainMenu.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/scripts/ui/MainMenu.gd
+------------------------------------------------------------------------
+class_name MainMenu
+extends Control
+
+enum MenuState { MAIN, START, SETTINGS }
+
+@onready var background: ColorRect = %Background
+@onready var title_label: Label = %TitleLabel
+@onready var menu_container: VBoxContainer = %MenuContainer
+@onready var start_button: Button = %StartButton
+@onready var online_button: Button = %OnlineButton
+@onready var vs_ai_button: Button = %VsAiButton
+@onready var continue_button: Button = %ContinueButton
+@onready var settings_button: Button = %SettingsButton
+@onready var quit_button: Button = %QuitButton
+
+@onready var start_panel: Panel = %StartPanel
+@onready var back_start_button: Button = %BackStartButton
+
+@onready var settings_panel: Panel = %SettingsPanel
+@onready var settings_container: VBoxContainer = %SettingsContainer
+@onready var close_settings_button: Button = %CloseSettingsButton
+
+@onready var music_slider: HSlider = %MusicSlider
+@onready var effects_slider: HSlider = %EffectsSlider
+@onready var overall_slider: HSlider = %OverallSlider
+@onready var fps_30_button: Button = %Fps30Button
+@onready var fps_60_button: Button = %Fps60Button
+@onready var dark_button: Button = %DarkButton
+@onready var light_button: Button = %LightButton
+
+@onready var music_value_label: Label = %MusicValue
+@onready var effects_value_label: Label = %EffectsValue
+@onready var overall_value_label: Label = %OverallValue
+
+var _state: MenuState = MenuState.MAIN:
+	set(value):
+		_state = value
+		_update_ui_state()
+
+
+func _ready() -> void:
+	_setup_buttons()
+	_setup_sliders()
+	_setup_fps_buttons()
+	_setup_theme_buttons()
+	_populate_slider_values()
+	_populate_fps_value()
+	_populate_theme_value()
+	_apply_background(Settings.dark_mode)
+	Settings.theme_changed.connect(_apply_background)
+	_update_ui_state()
+
+
+func _setup_buttons() -> void:
+	start_button.pressed.connect(_on_start_pressed)
+	continue_button.pressed.connect(_on_continue_pressed)
+	settings_button.pressed.connect(_on_settings_pressed)
+	quit_button.pressed.connect(_on_quit_pressed)
+	close_settings_button.pressed.connect(_on_close_settings_pressed)
+	online_button.pressed.connect(_on_online_pressed)
+	vs_ai_button.pressed.connect(_on_vs_ai_pressed)
+	back_start_button.pressed.connect(_on_back_start_pressed)
+
+
+func _setup_sliders() -> void:
+	music_slider.value_changed.connect(_on_music_slider_changed)
+	effects_slider.value_changed.connect(_on_effects_slider_changed)
+	overall_slider.value_changed.connect(_on_overall_slider_changed)
+
+
+func _setup_fps_buttons() -> void:
+	fps_30_button.pressed.connect(_on_fps_30_pressed)
+	fps_60_button.pressed.connect(_on_fps_60_pressed)
+
+
+func _setup_theme_buttons() -> void:
+	dark_button.pressed.connect(_on_dark_pressed)
+	light_button.pressed.connect(_on_light_pressed)
+
+
+func _populate_slider_values() -> void:
+	music_slider.value = Settings.music_volume
+	effects_slider.value = Settings.effects_volume
+	overall_slider.value = Settings.overall_volume
+	music_value_label.text = "%d" % (Settings.music_volume * 100)
+	effects_value_label.text = "%d" % (Settings.effects_volume * 100)
+	overall_value_label.text = "%d" % (Settings.overall_volume * 100)
+
+
+func _populate_fps_value() -> void:
+	_update_fps_buttons(Settings.target_fps)
+
+
+func _populate_theme_value() -> void:
+	_update_theme_buttons(Settings.dark_mode)
+
+
+func _update_ui_state() -> void:
+	start_panel.visible = _state == MenuState.START
+	settings_panel.visible = _state == MenuState.SETTINGS
+	menu_container.visible = _state == MenuState.MAIN
+
+
+func _update_fps_buttons(fps: int) -> void:
+	fps_30_button.button_pressed = fps == 30
+	fps_60_button.button_pressed = fps == 60
+
+
+func _update_theme_buttons(dark: bool) -> void:
+	dark_button.button_pressed = dark
+	light_button.button_pressed = not dark
+
+
+func _apply_background(dark: bool) -> void:
+	background.color = Color(0.07, 0.07, 0.12, 1) if dark else Color(0.88, 0.84, 0.74, 1)
+
+
+func _on_start_pressed() -> void:
+	_state = MenuState.START
+
+
+func _on_back_start_pressed() -> void:
+	_state = MenuState.MAIN
+
+
+func _on_online_pressed() -> void:
+	_state = MenuState.MAIN
+	get_tree().change_scene_to_file("res://scenes/lobby/Lobby.tscn")
+
+
+func _on_vs_ai_pressed() -> void:
+	_state = MenuState.MAIN
+	get_tree().change_scene_to_file("res://scenes/game/Game.tscn")
+
+
+func _on_continue_pressed() -> void:
+	if ResourceLoader.exists("res://scenes/game/Game.tscn"):
+		get_tree().change_scene_to_file("res://scenes/game/Game.tscn")
+
+
+func _on_settings_pressed() -> void:
+	_state = MenuState.SETTINGS
+
+
+func _on_close_settings_pressed() -> void:
+	_state = MenuState.MAIN
+
+
+func _on_quit_pressed() -> void:
+	get_tree().quit()
+
+
+func _on_music_slider_changed(value: float) -> void:
+	Settings.music_volume = value
+	music_value_label.text = "%d" % (value * 100)
+
+
+func _on_effects_slider_changed(value: float) -> void:
+	Settings.effects_volume = value
+	effects_value_label.text = "%d" % (value * 100)
+
+
+func _on_overall_slider_changed(value: float) -> void:
+	Settings.overall_volume = value
+	overall_value_label.text = "%d" % (value * 100)
+
+
+func _on_fps_30_pressed() -> void:
+	Settings.target_fps = 30
+	_update_fps_buttons(30)
+
+
+func _on_fps_60_pressed() -> void:
+	Settings.target_fps = 60
+	_update_fps_buttons(60)
+
+
+func _on_dark_pressed() -> void:
+	Settings.dark_mode = true
+	_update_theme_buttons(true)
+
+
+func _on_light_pressed() -> void:
+	Settings.dark_mode = false
+	_update_theme_buttons(false)
+
+------------------------------------------------------------------------
+FILE: scripts/ui/RackDisplay.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/scripts/ui/RackDisplay.gd
+------------------------------------------------------------------------
+class_name RackDisplay
+extends HBoxContainer
+
+signal tile_selected(index: int)
+signal tile_deselected()
+signal placed_tile_clicked(index: int)
+
+const Tiles = preload("res://scripts/game/Tiles.gd")
+
+const SLOT_SIZE := 80
+const SLOT_GAP := 6
+const SELECTED_BORDER_COLOR := Color(0.91, 0.27, 0.38, 1)
+const EXCHANGE_BORDER_COLOR := Color(0.3, 0.7, 0.9, 1)
+
+var _tile_color: Color       = Color(0.95, 0.92, 0.78, 1)
+var _empty_color: Color      = Color(0.15, 0.15, 0.25, 0.5)
+var _placed_color: Color     = Color(0.38, 0.38, 0.38, 0.7)
+var _letter_color: Color     = Color(0.10, 0.08, 0.06, 1)
+var _placed_letter_color: Color = Color(0.12, 0.10, 0.08, 1)
+var _value_color: Color      = Color(0.30, 0.25, 0.18, 1)
+
+var _slots: Array[Control]
+var _slot_bg: Array[ColorRect]
+var _slot_letter: Array[Label]
+var _slot_value: Array[Label]
+var _slot_border: Array[Panel]
+var _selected_index: int = -1
+var _placed_indices: Array[int] = []
+var _exchange_indices: Array[int] = []
+var _exchange_mode: bool = false
+var _tile_count: int = 7
+var _last_tiles: String = ""
+
+
+func _ready():
+	apply_theme(Settings.dark_mode)
+	Settings.theme_changed.connect(apply_theme)
+	_build_slots()
+
+
+func apply_theme(dark: bool):
+	if dark:
+		_tile_color          = Color(0.95, 0.92, 0.78, 1)
+		_empty_color         = Color(0.15, 0.15, 0.28, 0.6)
+		_placed_color        = Color(0.38, 0.38, 0.38, 0.7)
+		_letter_color        = Color(0.10, 0.08, 0.06, 1)
+		_placed_letter_color = Color(0.88, 0.88, 0.88, 1)
+		_value_color         = Color(0.30, 0.25, 0.18, 1)
+	else:
+		_tile_color          = Color(0.98, 0.95, 0.84, 1)
+		_empty_color         = Color(0.65, 0.60, 0.50, 0.5)
+		_placed_color        = Color(0.62, 0.60, 0.54, 0.8)
+		_letter_color        = Color(0.08, 0.06, 0.04, 1)
+		_placed_letter_color = Color(0.12, 0.10, 0.08, 1)
+		_value_color         = Color(0.30, 0.25, 0.15, 1)
+
+	if not _slot_bg.is_empty() and not _last_tiles.is_empty():
+		display(_last_tiles, _selected_index, _placed_indices)
+	elif not _slot_bg.is_empty():
+		for i in range(_tile_count):
+			if not _slot_letter[i].visible:
+				_slot_bg[i].color = _empty_color
+
+
+func _build_slots():
+	for i in range(_tile_count):
+		var slot = Panel.new()
+		slot.custom_minimum_size = Vector2(SLOT_SIZE, SLOT_SIZE)
+		slot.size = Vector2(SLOT_SIZE, SLOT_SIZE)
+		slot.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+		var handler = func(event, idx):
+			if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+				_on_slot_clicked(idx)
+		slot.gui_input.connect(handler.bind(i))
+
+		var bg = ColorRect.new()
+		bg.name = "BG"
+		bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		bg.position = Vector2.ZERO
+		bg.size = Vector2(SLOT_SIZE, SLOT_SIZE)
+		bg.color = _empty_color
+		slot.add_child(bg)
+		_slot_bg.append(bg)
+
+		var letter_label = Label.new()
+		letter_label.name = "Letter"
+		letter_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		letter_label.position = Vector2.ZERO
+		letter_label.size = Vector2(SLOT_SIZE, SLOT_SIZE)
+		letter_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		letter_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		letter_label.add_theme_font_size_override("font_size", 32)
+		letter_label.add_theme_color_override("font_color", _letter_color)
+		letter_label.visible = false
+		slot.add_child(letter_label)
+		_slot_letter.append(letter_label)
+
+		var value_label = Label.new()
+		value_label.name = "Value"
+		value_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		value_label.position = Vector2(SLOT_SIZE * 0.55, SLOT_SIZE * 0.6)
+		value_label.size = Vector2(SLOT_SIZE * 0.4, SLOT_SIZE * 0.35)
+		value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		value_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		value_label.add_theme_font_size_override("font_size", 14)
+		value_label.add_theme_color_override("font_color", _value_color)
+		value_label.visible = false
+		slot.add_child(value_label)
+		_slot_value.append(value_label)
+
+		var border = Panel.new()
+		border.name = "Border"
+		border.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		border.position = Vector2.ZERO
+		border.size = Vector2(SLOT_SIZE, SLOT_SIZE)
+		border.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+		slot.add_child(border)
+		_slot_border.append(border)
+
+		add_child(slot)
+		_slots.append(slot)
+
+		if i < _tile_count - 1:
+			var spacer = Control.new()
+			spacer.custom_minimum_size = Vector2(SLOT_GAP, 1)
+			add_child(spacer)
+
+
+func display(tiles: String, selected_index: int = -1, placed_indices: Array[int] = []):
+	_selected_index = selected_index
+	_placed_indices = placed_indices.duplicate()
+	_last_tiles = tiles
+
+	for i in range(_tile_count):
+		if i < tiles.length():
+			var letter = tiles[i]
+			var is_placed = placed_indices.has(i)
+
+			_slot_letter[i].text = letter
+			_slot_letter[i].visible = true
+			_slot_value[i].text = str(Tiles.get_value(letter))
+			_slot_value[i].visible = true
+
+			if is_placed:
+				_slot_bg[i].color = _placed_color
+				_slot_letter[i].add_theme_color_override("font_color", _placed_letter_color)
+				_slot_value[i].add_theme_color_override("font_color", _placed_letter_color)
+			else:
+				_slot_bg[i].color = _tile_color
+				_slot_letter[i].add_theme_color_override("font_color", _letter_color)
+				_slot_value[i].add_theme_color_override("font_color", _value_color)
+		else:
+			_slot_letter[i].visible = false
+			_slot_value[i].visible = false
+			_slot_bg[i].color = _empty_color
+
+		_update_slot_border(i)
+
+
+func set_exchange_mode(enabled: bool):
+	_exchange_mode = enabled
+	if not enabled:
+		_exchange_indices = []
+	_update_all_borders()
+
+
+func toggle_exchange_index(index: int):
+	if _exchange_indices.has(index):
+		_exchange_indices.erase(index)
+	else:
+		_exchange_indices.append(index)
+	_update_slot_border(index)
+
+
+func get_exchange_indices() -> Array[int]:
+	return _exchange_indices.duplicate()
+
+
+func _on_slot_clicked(index: int):
+	var letter = _slot_letter[index].text if _slot_letter[index].visible else ""
+	if letter.is_empty():
+		return
+
+	if _placed_indices.has(index):
+		placed_tile_clicked.emit(index)
+		return
+
+	if _exchange_mode:
+		toggle_exchange_index(index)
+		return
+
+	if _selected_index == index:
+		_selected_index = -1
+		_update_slot_border(index)
+		tile_deselected.emit()
+	else:
+		if _selected_index >= 0:
+			_update_slot_border(_selected_index)
+		_selected_index = index
+		_update_slot_border(index)
+		tile_selected.emit(index)
+
+
+func _update_slot_border(index: int):
+	var border = _slot_border[index]
+
+	if _exchange_mode and _exchange_indices.has(index):
+		border.add_theme_stylebox_override("panel", _make_border_style(EXCHANGE_BORDER_COLOR))
+	elif _selected_index == index:
+		border.add_theme_stylebox_override("panel", _make_border_style(SELECTED_BORDER_COLOR))
+	else:
+		border.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+
+
+func _update_all_borders():
+	for i in range(_tile_count):
+		_update_slot_border(i)
+
+
+func _make_border_style(color: Color) -> StyleBoxFlat:
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color.TRANSPARENT
+	style.border_width_left = 3
+	style.border_width_top = 3
+	style.border_width_right = 3
+	style.border_width_bottom = 3
+	style.border_color = color
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	style.corner_radius_bottom_right = 4
+	style.corner_radius_bottom_left = 4
+	return style
+
+
+func get_selected_index() -> int:
+	return _selected_index
+
+
+func get_selected_letter() -> String:
+	if _selected_index >= 0 and _slot_letter[_selected_index].visible:
+		return _slot_letter[_selected_index].text
+	return ""
+
+
+func clear_selection():
+	if _selected_index >= 0:
+		_update_slot_border(_selected_index)
+	_selected_index = -1
+	tile_deselected.emit()
+
+------------------------------------------------------------------------
+FILE: tests/debug_load.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/debug_load.gd
+------------------------------------------------------------------------
+extends Node
+
+func _init() -> void:
+	var mg_path = "res://scripts/ai/MoveGenerator.gd"
+	var MoveGenerator = load(mg_path)
+	if MoveGenerator:
+		print("Loaded: ", MoveGenerator)
+		var mg = MoveGenerator.new()
+		if mg:
+			print("Instantiated OK")
+			print("generate_moves: ", mg.has_method("generate_moves"))
+		else:
+			print("Failed to instantiate")
+	else:
+		print("Failed to load: ", mg_path)
+
+	var ai_path = "res://scripts/ai/AIPlayer.gd"
+	var AIPlayer = load(ai_path)
+	if AIPlayer:
+		print("AIPlayer loaded: ", AIPlayer)
+		var ai = AIPlayer.new()
+		if ai:
+			print("AIPlayer instantiated OK")
+		else:
+			print("AIPlayer failed to instantiate")
+
+	get_tree().quit()
+
+------------------------------------------------------------------------
+FILE: tests/test_audio_manager.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/test_audio_manager.gd
+------------------------------------------------------------------------
+extends GutTest
+
+var _audio: AudioManager
+
+
+func before_each() -> void:
+	_audio = autofree(AudioManager.new())
+	add_child_auto(_audio)
+
+
+func test_initial_bus_count() -> void:
+	assert_gt(AudioServer.bus_count, 2)
+
+
+func test_bus_name_master() -> void:
+	assert_eq(_audio._bus_name(_audio.Bus.MASTER), "Master")
+
+
+func test_bus_name_music() -> void:
+	assert_eq(_audio._bus_name(_audio.Bus.MUSIC), "Music")
+
+
+func test_bus_name_effects() -> void:
+	assert_eq(_audio._bus_name(_audio.Bus.EFFECTS), "Effects")
+
+
+func test_bus_name_fallback() -> void:
+	assert_eq(_audio._bus_name(99), "Master")
+
+
+func test_set_bus_volume_linear_zero() -> void:
+	_audio.set_bus_volume(_audio.Bus.MUSIC, 0.0)
+	assert_true(AudioServer.is_bus_mute(_audio.Bus.MUSIC))
+
+
+func test_set_bus_volume_linear_full() -> void:
+	_audio.set_bus_volume(_audio.Bus.MUSIC, 1.0)
+	assert_false(AudioServer.is_bus_mute(_audio.Bus.MUSIC))
+	assert_gt(AudioServer.get_bus_volume_db(_audio.Bus.MUSIC), -80.0)
+
+------------------------------------------------------------------------
+FILE: tests/test_main_menu.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/test_main_menu.gd
+------------------------------------------------------------------------
+extends GutTest
+
+var _menu: Control
+
+
+func before_each() -> void:
+	_menu = autofree(load("res://scenes/main_menu/MainMenu.tscn").instantiate())
+	add_child_auto(_menu)
+
+
+func test_initial_state_is_main() -> void:
+	assert_eq(_menu._state, _menu.MenuState.MAIN)
+
+
+func test_start_button_shows_start_panel() -> void:
+	_menu._on_start_pressed()
+	assert_eq(_menu._state, _menu.MenuState.START)
+
+
+func test_start_panel_visible_in_start_state() -> void:
+	_menu._on_start_pressed()
+	assert_true(_menu.start_panel.visible)
+	assert_false(_menu.settings_panel.visible)
+	assert_false(_menu.menu_container.visible)
+
+
+func test_settings_button_shows_settings_panel() -> void:
+	_menu._on_settings_pressed()
+	assert_eq(_menu._state, _menu.MenuState.SETTINGS)
+	assert_true(_menu.settings_panel.visible)
+	assert_false(_menu.menu_container.visible)
+
+
+func test_close_settings_returns_to_main() -> void:
+	_menu._on_settings_pressed()
+	_menu._on_close_settings_pressed()
+	assert_eq(_menu._state, _menu.MenuState.MAIN)
+
+
+func test_back_start_returns_to_main() -> void:
+	_menu._on_start_pressed()
+	_menu._on_back_start_pressed()
+	assert_eq(_menu._state, _menu.MenuState.MAIN)
+
+
+func test_quit_calls_tree_quit() -> void:
+	assert_has_signal(_menu.get_tree(), "tree_exiting")
+
+
+func test_music_slider_updates_label() -> void:
+	_menu._on_music_slider_changed(0.5)
+	assert_eq(_menu.music_value_label.text, "50")
+
+
+func test_effects_slider_updates_label() -> void:
+	_menu._on_effects_slider_changed(0.75)
+	assert_eq(_menu.effects_value_label.text, "75")
+
+
+func test_overall_slider_updates_label() -> void:
+	_menu._on_overall_slider_changed(1.0)
+	assert_eq(_menu.overall_value_label.text, "100")
+
+
+func test_fps_30_button_toggle() -> void:
+	_menu._on_fps_30_pressed()
+	assert_true(_menu.fps_30_button.button_pressed)
+	assert_false(_menu.fps_60_button.button_pressed)
+
+
+func test_fps_60_button_toggle() -> void:
+	_menu._on_fps_30_pressed()
+	_menu._on_fps_60_pressed()
+	assert_false(_menu.fps_30_button.button_pressed)
+	assert_true(_menu.fps_60_button.button_pressed)
+
+
+func test_state_update_hides_everything_in_main() -> void:
+	_menu._on_start_pressed()
+	_menu._on_back_start_pressed()
+	assert_false(_menu.start_panel.visible)
+	assert_false(_menu.settings_panel.visible)
+	assert_true(_menu.menu_container.visible)
+
+------------------------------------------------------------------------
+FILE: tests/test_settings_manager.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/test_settings_manager.gd
+------------------------------------------------------------------------
+extends GutTest
+
+var _settings: SettingsManager
+
+
+func before_each() -> void:
+	_settings = autofree(SettingsManager.new())
+
+
+func test_default_music_volume() -> void:
+	assert_eq(_settings.music_volume, 0.8)
+
+
+func test_default_effects_volume() -> void:
+	assert_eq(_settings.effects_volume, 0.8)
+
+
+func test_default_overall_volume() -> void:
+	assert_eq(_settings.overall_volume, 1.0)
+
+
+func test_default_target_fps() -> void:
+	assert_eq(_settings.target_fps, 60)
+
+
+func test_music_volume_clamped() -> void:
+	_settings.music_volume = 1.5
+	assert_eq(_settings.music_volume, 1.0)
+	_settings.music_volume = -0.5
+	assert_eq(_settings.music_volume, 0.0)
+
+
+func test_effects_volume_clamped() -> void:
+	_settings.effects_volume = 1.5
+	assert_eq(_settings.effects_volume, 1.0)
+	_settings.effects_volume = -0.5
+	assert_eq(_settings.effects_volume, 0.0)
+
+
+func test_overall_volume_clamped() -> void:
+	_settings.overall_volume = 1.5
+	assert_eq(_settings.overall_volume, 1.0)
+	_settings.overall_volume = -0.5
+	assert_eq(_settings.overall_volume, 0.0)
+
+
+func test_music_volume_emits_signal() -> void:
+	watch_signals(_settings)
+	_settings.music_volume = 0.5
+	assert_signal_emitted(_settings, "music_volume_changed")
+
+
+func test_effects_volume_emits_signal() -> void:
+	watch_signals(_settings)
+	_settings.effects_volume = 0.5
+	assert_signal_emitted(_settings, "effects_volume_changed")
+
+
+func test_overall_volume_emits_signal() -> void:
+	watch_signals(_settings)
+	_settings.overall_volume = 0.5
+	assert_signal_emitted(_settings, "overall_volume_changed")
+
+
+func test_fps_emits_signal() -> void:
+	watch_signals(_settings)
+	_settings.target_fps = 30
+	assert_signal_emitted(_settings, "fps_changed")
+
+
+func test_fps_sets_engine_max_fps() -> void:
+	_settings.target_fps = 30
+	assert_eq(Engine.max_fps, 30)
+
+
+func test_reset_to_defaults() -> void:
+	_settings.music_volume = 0.2
+	_settings.effects_volume = 0.3
+	_settings.overall_volume = 0.5
+	_settings.target_fps = 30
+	_settings.reset_to_defaults()
+	assert_eq(_settings.music_volume, 0.8)
+	assert_eq(_settings.effects_volume, 0.8)
+	assert_eq(_settings.overall_volume, 1.0)
+	assert_eq(_settings.target_fps, 60)
+
+
+func test_save_and_load_roundtrip() -> void:
+	_settings.music_volume = 0.3
+	_settings.effects_volume = 0.4
+	_settings.overall_volume = 0.9
+	_settings.target_fps = 30
+	_settings.save()
+
+	var loaded = autofree(SettingsManager.new())
+	loaded.load_settings()
+	assert_eq(loaded.music_volume, 0.3)
+	assert_eq(loaded.effects_volume, 0.4)
+	assert_eq(loaded.overall_volume, 0.9)
+	assert_eq(loaded.target_fps, 30)
+
+	_settings.reset_to_defaults()
+	_settings.save()
+
+------------------------------------------------------------------------
+FILE: tests/test_word_dictionary.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/test_word_dictionary.gd
+------------------------------------------------------------------------
+extends GutTest
+
+## WordDict is the autoload singleton, built once at startup from the
+## bundled German Scrabble word list.
+
+
+func test_dictionary_is_ready() -> void:
+	assert_true(WordDict.is_ready)
+
+
+func test_word_list_is_loaded() -> void:
+	assert_gt(WordDict.word_count, 0, "Word list should be populated")
+
+
+func test_valid_word_is_accepted() -> void:
+	assert_true(WordDict.is_valid_word("REGEN"))
+
+
+func test_lowercase_input_is_normalized() -> void:
+	assert_true(WordDict.is_valid_word("regen"))
+
+
+func test_nonsense_word_is_rejected() -> void:
+	assert_false(WordDict.is_valid_word("QQQQQ"))
+
+------------------------------------------------------------------------
+FILE: tests/unit/test_ai_player.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/unit/test_ai_player.gd
+------------------------------------------------------------------------
+extends GutTest
+
+const Board = preload("res://scripts/game/Board.gd")
+const Trie = preload("res://scripts/game/Trie.gd")
+const MoveGenerator = preload("res://scripts/ai/MoveGenerator.gd")
+const AIPlayer = preload("res://scripts/ai/AIPlayer.gd")
+
+var _ai: AIPlayer
+var _trie
+
+
+func before_each() -> void:
+	_trie = autofree(Trie.new())
+	_trie.insert("CAT")
+	_trie.insert("CATS")
+	_trie.insert("SCAT")
+	_trie.insert("AT")
+	_trie.insert("DO")
+	_trie.insert("ON")
+	_trie.insert("NO")
+
+	var move_gen = autofree(MoveGenerator.new())
+	_ai = autofree(AIPlayer.new(AIPlayer.Difficulty.HARD, move_gen, _trie))
+
+
+func test_ai_creates_move_generator() -> void:
+	var ai = autofree(AIPlayer.new())
+	assert_not_null(ai)
+
+
+func test_ai_difficulty_default_to_hard() -> void:
+	var ai = autofree(AIPlayer.new())
+	assert_eq(ai.get_difficulty(), AIPlayer.Difficulty.HARD)
+
+
+func test_ai_set_difficulty() -> void:
+	_ai.set_difficulty(AIPlayer.Difficulty.EASY)
+	assert_eq(_ai.get_difficulty(), AIPlayer.Difficulty.EASY)
+
+
+func test_ai_difficulty_name() -> void:
+	_ai.set_difficulty(AIPlayer.Difficulty.EASY)
+	assert_eq(_ai.get_difficulty_name(), "Easy")
+
+	_ai.set_difficulty(AIPlayer.Difficulty.MEDIUM)
+	assert_eq(_ai.get_difficulty_name(), "Medium")
+
+	_ai.set_difficulty(AIPlayer.Difficulty.HARD)
+	assert_eq(_ai.get_difficulty_name(), "Hard")
+
+
+func test_ai_choose_move_hard_returns_highest_score() -> void:
+	var board = autofree(Board.new())
+	board.place_tile(7, 7, "A")
+
+	var move_dict = _ai.choose_move(board, "SCATTEN")
+
+	assert_true(move_dict.score > 0, "Should find a scoring move")
+
+
+func test_ai_choose_move_easy_returns_valid_move() -> void:
+	_ai.set_difficulty(AIPlayer.Difficulty.EASY)
+	var board = autofree(Board.new())
+	board.place_tile(7, 7, "A")
+
+	var move_dict = _ai.choose_move(board, "SCATTEN")
+
+	if not move_dict.get("passed", false):
+		assert_gt(move_dict.score, 0)
+
+
+func test_ai_choose_move_medium_returns_valid_move() -> void:
+	_ai.set_difficulty(AIPlayer.Difficulty.MEDIUM)
+	var board = autofree(Board.new())
+	board.place_tile(7, 7, "A")
+
+	var move_dict = _ai.choose_move(board, "SCATTEN")
+
+	if not move_dict.get("passed", false):
+		assert_gt(move_dict.score, 0)
+
+
+func test_ai_choose_move_returns_dict_with_required_fields() -> void:
+	var board = autofree(Board.new())
+	board.place_tile(7, 7, "A")
+
+	var move_dict = _ai.choose_move(board, "SCATTEN")
+
+	assert_has(move_dict, "word")
+	assert_has(move_dict, "row")
+	assert_has(move_dict, "col")
+	assert_has(move_dict, "horizontal")
+	assert_has(move_dict, "score")
+
+
+func test_ai_empty_rack_returns_pass() -> void:
+	var board = autofree(Board.new())
+	board.place_tile(7, 7, "A")
+
+	var move_dict = _ai.choose_move(board, "")
+
+	assert_true(move_dict.get("passed", false))
+
+
+func test_ai_signals_emit() -> void:
+	var board = autofree(Board.new())
+	board.place_tile(7, 7, "A")
+
+	watch_signals(_ai)
+	var move_dict = _ai.choose_move(board, "CAT")
+
+	assert_signal_emitted(_ai, "thinking_started")
+	assert_signal_emitted(_ai, "thinking_finished")
+
+------------------------------------------------------------------------
+FILE: tests/unit/test_board.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/unit/test_board.gd
+------------------------------------------------------------------------
+extends GutTest
+
+const Board = preload("res://scripts/game/Board.gd")
+
+var _board: Board
+
+
+func before_each() -> void:
+	_board = autofree(Board.new())
+
+
+func test_new_board_is_empty() -> void:
+	assert_true(_board.is_first_move())
+	assert_eq(_board.get_tile(7, 7), "")
+
+
+func test_place_and_get_tile() -> void:
+	_board.place_tile(7, 7, "A")
+	assert_eq(_board.get_tile(7, 7), "A")
+
+
+func test_is_occupied() -> void:
+	assert_false(_board.is_occupied(7, 7))
+	_board.place_tile(7, 7, "A")
+	assert_true(_board.is_occupied(7, 7))
+
+
+func test_remove_tile() -> void:
+	_board.place_tile(7, 7, "A")
+	_board.remove_tile(7, 7)
+	assert_false(_board.is_occupied(7, 7))
+
+
+func test_clear_board() -> void:
+	_board.place_tile(7, 7, "A")
+	_board.place_tile(0, 0, "B")
+	_board.clear()
+	assert_true(_board.is_first_move())
+
+
+func test_get_center() -> void:
+	var center = _board.get_center()
+	assert_eq(center.x, 7)
+	assert_eq(center.y, 7)
+
+
+func test_anchors_on_empty_board_is_only_center() -> void:
+	var anchors = _board.get_anchors()
+	assert_eq(anchors.size(), 1)
+	assert_eq(anchors[0], Vector2i(7, 7))
+
+
+func test_anchors_after_placing_tile() -> void:
+	_board.place_tile(7, 7, "A")
+	var anchors = _board.get_anchors()
+	assert_gt(anchors.size(), 1)
+	var found = false
+	for a in anchors:
+		if a == Vector2i(7, 6):
+			found = true
+	assert_true(found)
+
+
+func test_anchors_dont_include_occupied_squares() -> void:
+	_board.place_tile(7, 7, "A")
+	var anchors = _board.get_anchors()
+	var found = anchors.has(Vector2i(7, 7))
+	assert_false(found)
+
+
+func test_is_first_move() -> void:
+	assert_true(_board.is_first_move())
+	_board.place_tile(0, 0, "X")
+	assert_false(_board.is_first_move())
+
+
+func test_get_bonus_squares() -> void:
+	assert_eq(_board.get_bonus(0, 0), 4)
+	assert_eq(_board.get_bonus(0, 3), 1)
+	assert_eq(_board.get_bonus(1, 1), 3)
+	assert_eq(_board.get_bonus(1, 5), 2)
+	assert_eq(_board.get_bonus(7, 7), 0)
+
+
+func test_get_existing_word_horizontal() -> void:
+	_board.place_tile(7, 6, "C")
+	_board.place_tile(7, 7, "A")
+	_board.place_tile(7, 8, "T")
+	var result = _board.get_existing_word(7, 6, true)
+	assert_eq(result.word, "CAT")
+	assert_eq(result.row, 7)
+	assert_eq(result.col, 6)
+
+
+func test_get_existing_word_vertical() -> void:
+	_board.place_tile(6, 7, "C")
+	_board.place_tile(7, 7, "A")
+	_board.place_tile(8, 7, "T")
+	var result = _board.get_existing_word(7, 7, false)
+	assert_eq(result.word, "CAT")
+	assert_eq(result.row, 6)
+	assert_eq(result.col, 7)
+
+
+func test_is_move_connected_first_move() -> void:
+	var tiles_placed = [Vector2i(7, 7)]
+	assert_true(_board.is_move_connected(7, 7, true, tiles_placed))
+
+
+func test_is_move_connected_not_center_fails_first_move() -> void:
+	var tiles_placed = [Vector2i(7, 6)]
+	assert_false(_board.is_move_connected(7, 6, true, tiles_placed))
+
+
+func test_is_move_connected_adjacent_to_existing() -> void:
+	_board.place_tile(7, 7, "A")
+	var tiles_placed = [Vector2i(7, 6)]
+	assert_true(_board.is_move_connected(7, 6, true, tiles_placed))
+
+
+func test_is_move_connected_not_adjacent() -> void:
+	_board.place_tile(7, 7, "A")
+	var tiles_placed = [Vector2i(5, 5)]
+	assert_false(_board.is_move_connected(5, 5, true, tiles_placed))
+
+------------------------------------------------------------------------
+FILE: tests/unit/test_board_cell_click.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/unit/test_board_cell_click.gd
+------------------------------------------------------------------------
+extends GutTest
+
+const Board = preload("res://scripts/game/Board.gd")
+
+
+func test_board_placement_sequence():
+	var board = autofree(Board.new())
+
+	# Verify center is empty
+	assert_true(board.is_empty_at(7, 7), "Center should be empty initially")
+
+	# Place first tile
+	board.place_tile(7, 7, "C")
+	assert_false(board.is_empty_at(7, 7), "Center should be occupied after placement")
+	assert_eq(board.get_tile(7, 7), "C", "Center should contain C")
+
+	# Place second tile adjacent
+	board.place_tile(7, 8, "A")
+	assert_eq(board.get_tile(7, 8), "A", "Adjacent cell should contain A")
+
+	# Place third tile
+	board.place_tile(7, 9, "T")
+	assert_eq(board.get_tile(7, 9), "T", "Third cell should contain T")
+
+	# Verify all placements
+	assert_eq(board.get_tile(7, 7), "C")
+	assert_eq(board.get_tile(7, 8), "A")
+	assert_eq(board.get_tile(7, 9), "T")
+
+	# Verify cells are occupied
+	assert_true(board.is_occupied(7, 7))
+	assert_true(board.is_occupied(7, 8))
+	assert_true(board.is_occupied(7, 9))
+
+	# Verify adjacent empty cells
+	assert_true(board.is_empty_at(7, 6))
+	assert_true(board.is_empty_at(7, 10))
+
+
+func test_board_placement_various_positions():
+	var board = autofree(Board.new())
+
+	var placements = [
+		{row: 0, col: 0, letter: "A"},
+		{row: 7, col: 7, letter: "B"},
+		{row: 14, col: 14, letter: "C"},
+		{row: 7, col: 0, letter: "D"},
+		{row: 0, col: 7, letter: "E"},
+	]
+
+	for p in placements:
+		board.place_tile(p.row, p.col, p.letter)
+		assert_eq(board.get_tile(p.row, p.col), p.letter,
+			"Placement at (%d,%d) should succeed" % [p.row, p.col])
+		assert_true(board.is_occupied(p.row, p.col))
+
+
+func test_board_tile_validity():
+	var board = autofree(Board.new())
+
+	# Place tiles
+	board.place_tile(5, 5, "T")
+	board.place_tile(5, 6, "E")
+	board.place_tile(5, 7, "S")
+	board.place_tile(5, 8, "T")
+
+	# Verify sequence
+	assert_eq(board.get_tile(5, 5), "T")
+	assert_eq(board.get_tile(5, 6), "E")
+	assert_eq(board.get_tile(5, 7), "S")
+	assert_eq(board.get_tile(5, 8), "T")
+
+	# Verify empty cells remain empty
+	assert_true(board.is_empty_at(5, 4))
+	assert_true(board.is_empty_at(5, 9))
+
+------------------------------------------------------------------------
+FILE: tests/unit/test_board_display.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/unit/test_board_display.gd
+------------------------------------------------------------------------
+extends GutTest
+
+const Board = preload("res://scripts/game/Board.gd")
+
+
+func test_bonus_labels_display_dl():
+	var board = autofree(Board.new())
+	# DL positions (light blue) - at (1,1)
+	var bonus = board.get_bonus(1, 1)
+	assert_eq(bonus, Board.BONUS_DL, "Position (1,1) should be DL")
+
+
+func test_bonus_labels_display_tl():
+	var board = autofree(Board.new())
+	# TL positions (blue) - at (0,0)
+	var bonus = board.get_bonus(0, 0)
+	assert_eq(bonus, Board.BONUS_TL, "Position (0,0) should be TL")
+
+
+func test_bonus_labels_display_dw():
+	var board = autofree(Board.new())
+	# DW positions (pink) - at (7,0)
+	var bonus = board.get_bonus(7, 0)
+	assert_eq(bonus, Board.BONUS_DW, "Position (7,0) should be DW")
+
+
+func test_bonus_labels_display_tw():
+	var board = autofree(Board.new())
+	# TW positions (red) - at (0,7)
+	var bonus = board.get_bonus(0, 7)
+	assert_eq(bonus, Board.BONUS_TW, "Position (0,7) should be TW")
+
+
+func test_bonus_labels_display_none():
+	var board = autofree(Board.new())
+	# Regular positions should have BONUS_NONE
+	var bonus = board.get_bonus(3, 3)
+	assert_eq(bonus, Board.BONUS_NONE, "Position (3,3) should be BONUS_NONE")
+
+------------------------------------------------------------------------
+FILE: tests/unit/test_exchange_integration.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/unit/test_exchange_integration.gd
+------------------------------------------------------------------------
+extends GutTest
+
+const TileBag = preload("res://scripts/game/TileBag.gd")
+const TileRack = preload("res://scripts/game/TileRack.gd")
+
+
+func test_exchange_flow_basic():
+	var bag = autofree(TileBag.new())
+	var rack = autofree(TileRack.new("ABCDEFG"))
+
+	var initial_rack = rack.get_tiles()
+	assert_eq(initial_rack.length(), 7)
+
+	# Simulate exchange: remove some tiles
+	rack.remove_letter("A")
+	rack.remove_letter("B")
+	rack.remove_letter("C")
+
+	assert_eq(rack.get_tiles().length(), 4)
+
+	# Get new tiles from bag
+	var new_tiles = bag.exchange("ABC")
+	assert_eq(new_tiles.length(), 3)
+
+	# Add to rack
+	rack.add_tiles(new_tiles)
+	assert_eq(rack.get_tiles().length(), 7)
+
+
+func test_exchange_with_balanced_start():
+	var bag = autofree(TileBag.new())
+
+	# Draw initial balanced hands
+	var hand1 = bag.draw_balanced_tiles(7)
+	var hand2 = bag.draw_balanced_tiles(7)
+
+	assert_eq(hand1.length(), 7)
+	assert_eq(hand2.length(), 7)
+
+	# Create racks from balanced hands
+	var rack1 = autofree(TileRack.new(hand1))
+	var rack2 = autofree(TileRack.new(hand2))
+
+	# Exchange operation: remove first 3 tiles from rack1
+	var exchange_letters = hand1.substr(0, 3)
+	for c in exchange_letters:
+		rack1.remove_letter(c)
+
+	# Get new tiles from exchange
+	var new_tiles = bag.exchange(exchange_letters)
+
+	# Add new tiles to rack
+	rack1.add_tiles(new_tiles)
+
+	# Rack should still have 7 tiles
+	assert_eq(rack1.get_tiles().length(), 7)
+
+
+func test_exchange_bag_maintains_distribution():
+	var bag = autofree(TileBag.new())
+
+	var initial_remaining = bag.remaining()
+
+	# Draw all initial tiles
+	var hand1 = bag.draw_balanced_tiles(7)
+	var hand2 = bag.draw_balanced_tiles(7)
+	var remaining_after_draw = bag.remaining()
+
+	# Exchange from hand1
+	var exchanged = bag.exchange("ABC")
+
+	var final_remaining = bag.remaining()
+
+	# After exchange: pool should have same remaining count
+	assert_eq(final_remaining, remaining_after_draw,
+		"Remaining tiles should be same after exchange")
+
+
+func test_exchange_cannot_exceed_bag_size():
+	var bag = autofree(TileBag.new())
+
+	# Draw most of the tiles
+	var hand1 = bag.draw_balanced_tiles(7)
+	var hand2 = bag.draw_balanced_tiles(7)
+	var hand3 = bag.draw_balanced_tiles(7)
+	var hand4 = bag.draw_balanced_tiles(7)
+	var hand5 = bag.draw_balanced_tiles(7)
+	var hand6 = bag.draw_balanced_tiles(7)
+	var hand7 = bag.draw_balanced_tiles(7)
+
+	# Very few tiles left
+	assert_lt(bag.remaining(), 10, "Should have few tiles left")
+
+	# Try to exchange: should work but might get fewer new tiles if bag is empty
+	var exchanged = bag.exchange("ABC")
+	assert_gte(exchanged.length(), 0, "Exchange should always return a string")
+
+------------------------------------------------------------------------
+FILE: tests/unit/test_exchange_placement.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/unit/test_exchange_placement.gd
+------------------------------------------------------------------------
+extends GutTest
+
+const Board = preload("res://scripts/game/Board.gd")
+const TileRack = preload("res://scripts/game/TileRack.gd")
+const TileBag = preload("res://scripts/game/TileBag.gd")
+
+
+func test_board_cell_can_be_empty():
+	var board = autofree(Board.new())
+	# Verify initial board is empty
+	assert_true(board.is_empty_at(7, 7), "Center cell should be empty")
+
+
+func test_board_cell_can_be_occupied():
+	var board = autofree(Board.new())
+	board.place_tile(7, 7, "A")
+	assert_false(board.is_empty_at(7, 7), "Cell with tile should not be empty")
+	assert_eq(board.get_tile(7, 7), "A", "Cell should contain placed tile")
+
+
+func test_tile_rack_add_remove():
+	var bag = autofree(TileBag.new())
+	var rack = autofree(TileRack.new("ABC"))
+
+	assert_eq(rack.get_tiles(), "ABC", "Rack should contain initial tiles")
+
+	rack.remove_letter("B")
+	assert_eq(rack.get_tiles(), "AC", "Rack should have B removed")
+
+	rack.add_tiles("X")
+	assert_eq(rack.get_tiles(), "ACX", "Rack should have X added")
+
+
+func test_exchange_bag_functionality():
+	var bag = autofree(TileBag.new())
+
+	# Draw initial tiles
+	var initial = bag.draw_tiles(7)
+	var initial_remaining = bag.remaining()
+
+	# Exchange some tiles
+	var returned = "ABC"
+	var new_tiles = bag.exchange(returned)
+
+	assert_eq(new_tiles.length(), returned.length(), "Exchange should return same number of tiles")
+	assert_eq(bag.remaining(), initial_remaining, "Remaining tiles should be same after exchange")
+
+
+func test_multiple_tile_placements():
+	var board = autofree(Board.new())
+
+	# Place first tile
+	board.place_tile(7, 7, "C")
+	assert_eq(board.get_tile(7, 7), "C")
+
+	# Place second tile
+	board.place_tile(7, 8, "A")
+	assert_eq(board.get_tile(7, 8), "A")
+
+	# Place third tile
+	board.place_tile(7, 9, "T")
+	assert_eq(board.get_tile(7, 9), "T")
+
+	# Verify all three are placed
+	assert_eq(board.get_tile(7, 7), "C")
+	assert_eq(board.get_tile(7, 8), "A")
+	assert_eq(board.get_tile(7, 9), "T")
+
+
+func test_board_is_occupied_correct():
+	var board = autofree(Board.new())
+
+	# Initially empty
+	assert_false(board.is_occupied(7, 7))
+
+	# Place a tile
+	board.place_tile(7, 7, "A")
+
+	# Now occupied
+	assert_true(board.is_occupied(7, 7))
+	assert_false(board.is_occupied(7, 8))
+
+
+func test_tile_placement_across_board():
+	var board = autofree(Board.new())
+
+	# Place tiles in various positions
+	var positions := [
+		Vector2i(0, 0), Vector2i(7, 7), Vector2i(14, 14),
+		Vector2i(7, 0), Vector2i(0, 14), Vector2i(5, 10),
+	]
+
+	for pos in positions:
+		board.place_tile(pos.x, pos.y, "X")
+		assert_eq(board.get_tile(pos.x, pos.y), "X",
+			"Tile should be placed at (%d,%d)" % [pos.x, pos.y])
+
+------------------------------------------------------------------------
+FILE: tests/unit/test_game_integration.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/unit/test_game_integration.gd
+------------------------------------------------------------------------
+extends GutTest
+
+const Board = preload("res://scripts/game/Board.gd")
+const Trie = preload("res://scripts/game/Trie.gd")
+const MoveGenerator = preload("res://scripts/ai/MoveGenerator.gd")
+const AIPlayer = preload("res://scripts/ai/AIPlayer.gd")
+const Scoring = preload("res://scripts/game/Scoring.gd")
+const Tiles = preload("res://scripts/game/Tiles.gd")
+
+
+func _make_minimal_trie() -> Trie:
+	var t = autofree(Trie.new())
+	for w in ["AT", "CAT"]:
+		t.insert(w)
+	return t
+
+
+func test_full_game_ai_plays_two_words() -> void:
+	var trie = _make_minimal_trie()
+	var board = autofree(Board.new())
+	var mg = autofree(MoveGenerator.new())
+	var ai = autofree(AIPlayer.new(AIPlayer.Difficulty.HARD, mg, trie))
+
+	# Move 1: AI plays "AT" from center (7,7) as first word
+	var move1 = ai.choose_move(board, "AT")
+	assert_false(move1.get("passed", false), "AI should not pass with AT rack")
+	assert_eq(move1.word, "AT", "First word should be AT")
+	assert_eq(move1.row, 7, "First word row should be center (7)")
+	assert_eq(move1.col, 7, "First word col should be center (7)")
+	assert_true(move1.horizontal, "First word should be horizontal")
+	assert_eq(move1.score, 2, "A(1)+T(1) with no bonuses = 2")
+
+	# Place "AT" on the board
+	for tp in move1.tiles_placed:
+		var idx = move1.tiles_placed.find(tp)
+		board.place_tile(tp.x, tp.y, move1.word[idx])
+
+	assert_eq(board.get_tile(7, 7), "A")
+	assert_eq(board.get_tile(7, 8), "T")
+
+	# Move 2: AI plays "CAT" by placing C left of AT
+	var move2 = ai.choose_move(board, "C")
+	assert_false(move2.get("passed", false), "AI should not pass with C rack")
+	assert_eq(move2.word, "CAT", "Second word should be CAT extending AT")
+
+	var found_c_pos = false
+	for tp in move2.tiles_placed:
+		if tp.x == 7 and tp.y == 6:
+			found_c_pos = true
+			break
+	assert_true(found_c_pos, "C should be placed at (7,6) left of A")
+
+	var expected_cat_score = Scoring.calculate(board, "CAT", 7, 6, true, move2.tiles_placed)
+	assert_eq(move2.score, expected_cat_score, "Score should match Scoring.calculate")
+
+	# Place "C" on the board
+	for tp in move2.tiles_placed:
+		var idx = move2.tiles_placed.find(tp)
+		board.place_tile(tp.x, tp.y, move2.word[idx])
+
+	# Verify final board state
+	assert_eq(board.get_tile(7, 6), "C")
+	assert_eq(board.get_tile(7, 7), "A")
+	assert_eq(board.get_tile(7, 8), "T")
+
+	# Verify all words on the board are valid
+	var all_words = board.get_all_words(trie)
+	for w in all_words:
+		assert_true(trie.search(w.word), "Every word on board must be valid: " + w.word)
+
+	# Total combined score
+	var total = move1.score + move2.score
+	assert_eq(total, 8, "CAT via AT extension: A(1)+T(1)=2 then C(4)+A(1)+T(1)=6, total=8")
+
+	# Move 3: With empty rack, AI has no moves and must pass
+	var move3 = ai.choose_move(board, "")
+	assert_true(move3.get("passed", false), "AI must pass with empty rack")
+	assert_eq(move3.score, 0, "Pass move should have 0 score")
+
+
+func test_full_game_produces_reproducible_scores() -> void:
+	var trie = _make_minimal_trie()
+	var board = autofree(Board.new())
+	var mg = autofree(MoveGenerator.new())
+	var ai = autofree(AIPlayer.new(AIPlayer.Difficulty.HARD, mg, trie))
+
+	var move1 = ai.choose_move(board, "AT")
+	assert_eq(move1.word, "AT", "First word always AT")
+	assert_eq(move1.score, 2)
+
+	for tp in move1.tiles_placed:
+		var idx = move1.tiles_placed.find(tp)
+		board.place_tile(tp.x, tp.y, move1.word[idx])
+
+	var move2 = ai.choose_move(board, "C")
+	assert_eq(move2.word, "CAT", "Second word always CAT")
+
+	for tp in move2.tiles_placed:
+		var idx = move2.tiles_placed.find(tp)
+		board.place_tile(tp.x, tp.y, move2.word[idx])
+
+	# Run again to verify reproducibility
+	var board2 = autofree(Board.new())
+	var ai2 = autofree(AIPlayer.new(AIPlayer.Difficulty.HARD, mg, trie))
+
+	var m1 = ai2.choose_move(board2, "AT")
+	for tp in m1.tiles_placed:
+		board2.place_tile(tp.x, tp.y, m1.word[m1.tiles_placed.find(tp)])
+
+	var m2 = ai2.choose_move(board2, "C")
+	for tp in m2.tiles_placed:
+		board2.place_tile(tp.x, tp.y, m2.word[m2.tiles_placed.find(tp)])
+
+	assert_eq(m1.score, move1.score, "First move score should be reproducible")
+	assert_eq(m2.score, move2.score, "Second move score should be reproducible")
+	assert_eq(m2.word, move2.word, "Second word should be reproducible")
+
+	# Verify board states match
+	for r in range(Board.SIZE):
+		for c in range(Board.SIZE):
+			assert_eq(board2.get_tile(r, c), board.get_tile(r, c),
+				"Board state should match at (%d,%d)" % [r, c])
+
+
+func test_game_ends_via_consecutive_passes() -> void:
+	var trie = autofree(Trie.new())
+	var board = autofree(Board.new())
+	var mg = autofree(MoveGenerator.new())
+	var ai = autofree(AIPlayer.new(AIPlayer.Difficulty.EASY, mg, trie))
+
+	# Empty trie means no valid words can be formed
+	# Every AI turn results in a pass
+	var consecutive_passes := 0
+
+	# Simulate alternating turns; each AI player passes
+	var rack = "ABCDEFG"
+	for turn in range(10):
+		var move = ai.choose_move(board, rack)
+		if move.get("passed", false):
+			consecutive_passes += 1
+		else:
+			consecutive_passes = 0
+			for tp in move.tiles_placed:
+				board.place_tile(tp.x, tp.y, move.word[move.tiles_placed.find(tp)])
+
+		# Check game-over trigger (6 consecutive passes = 3 per side in real game)
+		if consecutive_passes >= 6:
+			break
+
+	assert_true(consecutive_passes >= 6, "Game should end after 6 consecutive passes")
+	assert_true(board.is_first_move(), "Board should be empty (all passes)")
+
+------------------------------------------------------------------------
+FILE: tests/unit/test_game_state_exchange.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/unit/test_game_state_exchange.gd
+------------------------------------------------------------------------
+extends GutTest
+
+const Tiles = preload("res://scripts/game/Tiles.gd")
+const TileBag = preload("res://scripts/game/TileBag.gd")
+const TileRack = preload("res://scripts/game/TileRack.gd")
+
+
+func test_initial_racks_are_balanced():
+	var bag = autofree(TileBag.new())
+
+	# Simulate game start with balanced draws
+	var human_rack_tiles = bag.draw_balanced_tiles(7)
+	var ai_rack_tiles = bag.draw_balanced_tiles(7)
+
+	assert_eq(human_rack_tiles.length(), 7, "Human should get 7 tiles")
+	assert_eq(ai_rack_tiles.length(), 7, "AI should get 7 tiles")
+
+	# Check human rack is balanced
+	var human_vowels = _count_vowels(human_rack_tiles)
+	var human_consonants = _count_consonants(human_rack_tiles)
+	assert_gte(human_vowels, 2, "Human should have at least 2 vowels")
+	assert_gte(human_consonants, 2, "Human should have at least 2 consonants")
+
+	# Check AI rack is balanced
+	var ai_vowels = _count_vowels(ai_rack_tiles)
+	var ai_consonants = _count_consonants(ai_rack_tiles)
+	assert_gte(ai_vowels, 2, "AI should have at least 2 vowels")
+	assert_gte(ai_consonants, 2, "AI should have at least 2 consonants")
+
+
+func test_exchange_does_not_lose_tiles():
+	var bag = autofree(TileBag.new())
+	var rack = autofree(TileRack.new("ABCDEFG"))
+
+	var total_before = bag.remaining() + rack.get_tiles().length()
+
+	# Exchange tiles
+	var exchanged_tiles = "ABC"
+	for c in exchanged_tiles:
+		rack.remove_letter(c)
+
+	var new_tiles = bag.exchange(exchanged_tiles)
+	rack.add_tiles(new_tiles)
+
+	var total_after = bag.remaining() + rack.get_tiles().length()
+
+	assert_eq(total_after, total_before, "Total tiles should be conserved")
+
+
+func test_exchange_flow_complete():
+	var bag = autofree(TileBag.new())
+
+	# Start game
+	var human_hand = bag.draw_balanced_tiles(7)
+	var ai_hand = bag.draw_balanced_tiles(7)
+	var human_rack = autofree(TileRack.new(human_hand))
+	var ai_rack = autofree(TileRack.new(ai_hand))
+
+	# Human decides to exchange 3 tiles
+	var exchange_count = 3
+	var tiles_to_exchange = human_hand.substr(0, exchange_count)
+
+	# Remove tiles from rack
+	for c in tiles_to_exchange:
+		human_rack.remove_letter(c)
+
+	assert_eq(human_rack.get_tiles().length(), 7 - exchange_count,
+		"Rack should have fewer tiles after removing exchange tiles")
+
+	# Get new tiles
+	var new_tiles = bag.exchange(tiles_to_exchange)
+	assert_eq(new_tiles.length(), exchange_count, "Should get same number of new tiles")
+
+	# Add back to rack
+	human_rack.add_tiles(new_tiles)
+	assert_eq(human_rack.get_tiles().length(), 7, "Rack should have 7 tiles again")
+
+
+func test_exchange_maintains_tile_count():
+	var bag = autofree(TileBag.new())
+
+	# Initial state
+	var initial_total = bag.remaining() + 14  # 2 racks of 7
+
+	# Draw initial hands
+	var hand1 = bag.draw_balanced_tiles(7)
+	var hand2 = bag.draw_balanced_tiles(7)
+
+	var after_draw_total = bag.remaining() + hand1.length() + hand2.length()
+	assert_eq(after_draw_total, initial_total, "Tile count should be conserved after draw")
+
+	# Perform exchange
+	var exchange_result = bag.exchange("ABCD")
+	assert_eq(exchange_result.length(), 4, "Exchange should return 4 new tiles")
+
+	# Verify total again
+	var after_exchange_total = bag.remaining() + hand1.length() + hand2.length()
+	assert_eq(after_exchange_total, initial_total, "Tile count should remain after exchange")
+
+
+func _count_vowels(tiles: String) -> int:
+	var vowels := "AEIOUÄÖÜ"
+	var count := 0
+	for c in tiles:
+		if vowels.contains(c):
+			count += 1
+	return count
+
+
+func _count_consonants(tiles: String) -> int:
+	var vowels := "AEIOUÄÖÜ"
+	var count := 0
+	for c in tiles:
+		if not vowels.contains(c) and c != "_":
+			count += 1
+	return count
+
+------------------------------------------------------------------------
+FILE: tests/unit/test_move_generator.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/unit/test_move_generator.gd
+------------------------------------------------------------------------
+extends GutTest
+
+const Board = preload("res://scripts/game/Board.gd")
+const Trie = preload("res://scripts/game/Trie.gd")
+const MoveGenerator = preload("res://scripts/ai/MoveGenerator.gd")
+const Scoring = preload("res://scripts/game/Scoring.gd")
+
+var _move_gen
+
+
+func before_each() -> void:
+	_move_gen = autofree(MoveGenerator.new())
+
+
+func _make_trie() -> Trie:
+	var t = autofree(Trie.new())
+	var words = [
+		"CAT", "CATS", "SCAT", "CATER", "CAN", "CANE", "CART",
+		"POND", "PONDER", "PONDS",
+		"DOG", "DOGS",
+		"AT", "DO", "ON", "NO", "TO", "SO", "PA", "PO", "OP",
+		"AN", "AD", "AE", "ED", "EN", "ES", "ET", "NE",
+		"OD", "OE", "OS", "OW", "PE", "RE", "TA", "TE", "TI",
+		"CAR", "CARD", "CARE", "CARN", "CART",
+		"SPA", "SPAN", "SPAND", "SPANE", "SPANK", "SPANKS",
+		"SON", "SONS", "SONDE", "SONDES",
+		"ONE", "ONES",
+		"PEN", "PENS", "PEND", "PENDS",
+		"END", "ENDS",
+		"SEND", "SENDS",
+		"AND", "SAND", "SANDS",
+		"TAP", "TAPS", "TAN", "TANS", "TAD",
+		"CAP", "CAPS",
+		"NAP", "NAPS",
+		"SAP", "SAPS",
+		"DAP",
+		"PAN", "PANS", "PANE", "PANES",
+		"NODE", "NODES",
+		"NOTE", "NOTES",
+		"DOTE", "DOTES",
+		"CODE", "TOTE",
+		"CONE",
+		"TON", "TONS", "TONE", "TONES",
+		"CANT", "CANTS",
+		"SCAN", "SCANS",
+		"SCANT",
+		"SCONE", "SCONES",
+		"ASCOT",
+	]
+	for w in words:
+		t.insert(w)
+	return t
+
+
+func test_generate_moves_returns_array() -> void:
+	var board = autofree(Board.new())
+	var trie = _make_trie()
+	board.place_tile(7, 7, "A")
+
+	var moves = _move_gen.generate_moves(board, "CAT", trie)
+
+	assert_true(moves is Array)
+
+
+func test_first_move_generates_words() -> void:
+	var board = autofree(Board.new())
+	var trie = autofree(Trie.new())
+	trie.insert("CAT")
+
+	var moves = _move_gen.generate_moves(board, "CAT", trie)
+
+	assert_gt(moves.size(), 0)
+
+
+func test_first_move_finds_center_word() -> void:
+	var board = autofree(Board.new())
+	var trie = autofree(Trie.new())
+	trie.insert("CAT")
+
+	var moves = _move_gen.generate_moves(board, "CAT", trie)
+
+	var found = false
+	for m in moves:
+		if m.word == "CAT" and m.horizontal and m.col == 7 and m.row == 7:
+			found = true
+	assert_true(found)
+
+
+func test_horizontal_extension_finds_cats() -> void:
+	var board = autofree(Board.new())
+	board.place_tile(7, 7, "A")
+	board.place_tile(7, 8, "T")
+	var trie = _make_trie()
+
+	var moves = _move_gen.generate_moves(board, "SXCDEN", trie)
+
+	var found = false
+	for m in moves:
+		if m.word == "CATS" and m.horizontal:
+			found = true
+			break
+	assert_true(found)
+
+
+func test_no_invalid_words_generated() -> void:
+	var board = autofree(Board.new())
+	board.place_tile(7, 7, "A")
+	var trie = _make_trie()
+
+	var moves = _move_gen.generate_moves(board, "SXCDEN", trie)
+
+	for m in moves:
+		assert_true(trie.search(m.word), "Every generated word must be valid: " + m.word)
+
+
+func test_generated_moves_have_scores() -> void:
+	var board = autofree(Board.new())
+	var trie = autofree(Trie.new())
+	trie.insert("AT")
+
+	var moves = _move_gen.generate_moves(board, "AT", trie)
+
+	for m in moves:
+		assert_gt(m.score, 0)
+
+
+func test_generated_moves_have_correct_orientation() -> void:
+	var board = autofree(Board.new())
+	var trie = _make_trie()
+	board.place_tile(7, 7, "A")
+	board.place_tile(7, 8, "T")
+
+	var moves = _move_gen.generate_moves(board, "SXCDEN", trie)
+
+	for m in moves:
+		if m.word == "CATS":
+			assert_true(m.horizontal, "CATS should be horizontal")
+		if m.word == "SCAT":
+			assert_true(m.horizontal, "SCAT should be horizontal")
+
+------------------------------------------------------------------------
+FILE: tests/unit/test_rack_display_exchange.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/unit/test_rack_display_exchange.gd
+------------------------------------------------------------------------
+extends GutTest
+
+const RackDisplay = preload("res://scripts/ui/RackDisplay.gd")
+
+
+func test_exchange_indices_tracking():
+	var rack = autofree(RackDisplay.new())
+	rack._build_slots()
+
+	# Verify initial state
+	assert_eq(rack.get_exchange_indices().size(), 0, "Should start with no exchange indices")
+
+	# Toggle exchange mode
+	rack.set_exchange_mode(true)
+	assert_true(rack._exchange_mode, "Should be in exchange mode")
+
+	# Toggle first index
+	rack.toggle_exchange_index(0)
+	assert_true(rack.get_exchange_indices().has(0), "Index 0 should be selected")
+	assert_eq(rack.get_exchange_indices().size(), 1, "Should have 1 selected index")
+
+	# Toggle second index
+	rack.toggle_exchange_index(1)
+	assert_true(rack.get_exchange_indices().has(1), "Index 1 should be selected")
+	assert_eq(rack.get_exchange_indices().size(), 2, "Should have 2 selected indices")
+
+	# Deselect first index
+	rack.toggle_exchange_index(0)
+	assert_false(rack.get_exchange_indices().has(0), "Index 0 should be deselected")
+	assert_eq(rack.get_exchange_indices().size(), 1, "Should have 1 selected index")
+
+
+func test_exchange_mode_clears_indices():
+	var rack = autofree(RackDisplay.new())
+	rack._build_slots()
+
+	rack.set_exchange_mode(true)
+	rack.toggle_exchange_index(0)
+	rack.toggle_exchange_index(1)
+
+	assert_eq(rack.get_exchange_indices().size(), 2, "Should have 2 selected")
+
+	# Disable exchange mode
+	rack.set_exchange_mode(false)
+	assert_eq(rack.get_exchange_indices().size(), 0, "Should clear indices when disabling exchange mode")
+
+
+func test_exchange_mode_toggle():
+	var rack = autofree(RackDisplay.new())
+	rack._build_slots()
+
+	# Start not in exchange mode
+	assert_false(rack._exchange_mode)
+
+	# Enter exchange mode
+	rack.set_exchange_mode(true)
+	assert_true(rack._exchange_mode)
+
+	# Exit exchange mode
+	rack.set_exchange_mode(false)
+	assert_false(rack._exchange_mode)
+
+------------------------------------------------------------------------
+FILE: tests/unit/test_scoring.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/unit/test_scoring.gd
+------------------------------------------------------------------------
+extends GutTest
+
+const Board = preload("res://scripts/game/Board.gd")
+const Tiles = preload("res://scripts/game/Tiles.gd")
+const Scoring = preload("res://scripts/game/Scoring.gd")
+
+
+func test_tile_values() -> void:
+	assert_eq(Tiles.get_value("A"), 1)
+	assert_eq(Tiles.get_value("Z"), 3)
+	assert_eq(Tiles.get_value("Q"), 10)
+	assert_eq(Tiles.get_value("_"), 0)
+
+
+func test_rack_value() -> void:
+	assert_eq(Tiles.get_rack_value("AE"), 2)
+	assert_eq(Tiles.get_rack_value("QZ"), 13)
+
+
+func test_score_simple_word() -> void:
+	var board = autofree(Board.new())
+	var tiles_placed = [Vector2i(7, 7), Vector2i(7, 8), Vector2i(7, 9)]
+	var score = Scoring.calculate(board, "CAT", 7, 7, true, tiles_placed)
+	assert_eq(score, 6)
+
+
+func test_score_with_double_letter() -> void:
+	var board = autofree(Board.new())
+	var tiles_placed = [Vector2i(0, 3)]
+	board.place_tile(0, 3, "C")
+	var score = Scoring.calculate(board, "C", 0, 3, true, tiles_placed)
+	assert_eq(score, 8)
+
+
+func test_score_with_triple_word() -> void:
+	var board = autofree(Board.new())
+	var tiles_placed = [Vector2i(0, 0), Vector2i(0, 1), Vector2i(0, 2)]
+	board.place_tile(0, 0, "C")
+	board.place_tile(0, 1, "A")
+	board.place_tile(0, 2, "T")
+	var score = Scoring.calculate(board, "CAT", 0, 0, true, tiles_placed)
+	assert_eq(score, 18)
+
+
+func test_bingo_bonus() -> void:
+	var board = autofree(Board.new())
+	var tiles_placed = []
+	for i in range(7):
+		tiles_placed.append(Vector2i(7, 7 + i))
+	var score = Scoring.calculate(board, "ABCDEFG", 7, 7, true, tiles_placed)
+	assert_gt(score, 50)
+
+------------------------------------------------------------------------
+FILE: tests/unit/test_tile_bag_balanced.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/unit/test_tile_bag_balanced.gd
+------------------------------------------------------------------------
+extends GutTest
+
+const TileBag = preload("res://scripts/game/TileBag.gd")
+
+
+func _count_vowels_consonants(tiles: String) -> Dictionary:
+	var vowels := "AEIOUÄÖÜ"
+	var vowel_count := 0
+	var consonant_count := 0
+
+	for c in tiles:
+		if vowels.contains(c):
+			vowel_count += 1
+		elif c != "_":
+			consonant_count += 1
+
+	return {vowels: vowel_count, consonants: consonant_count}
+
+
+func test_balanced_draw_returns_7_tiles():
+	var bag = autofree(TileBag.new())
+	var tiles = bag.draw_balanced_tiles(7)
+	assert_eq(tiles.length(), 7, "draw_balanced_tiles should return 7 tiles")
+
+
+func test_balanced_draw_has_2_vowels():
+	var bag = autofree(TileBag.new())
+	var tiles = bag.draw_balanced_tiles(7)
+	var counts = _count_vowels_consonants(tiles)
+	assert_gte(counts.vowels, 2, "Balanced draw should have at least 2 vowels")
+
+
+func test_balanced_draw_has_2_consonants():
+	var bag = autofree(TileBag.new())
+	var tiles = bag.draw_balanced_tiles(7)
+	var counts = _count_vowels_consonants(tiles)
+	assert_gte(counts.consonants, 2, "Balanced draw should have at least 2 consonants")
+
+
+func test_multiple_balanced_draws_maintain_constraint():
+	var bag = autofree(TileBag.new())
+
+	# Draw first hand
+	var hand1 = bag.draw_balanced_tiles(7)
+	var counts1 = _count_vowels_consonants(hand1)
+	assert_gte(counts1.vowels, 2, "First draw should have at least 2 vowels")
+	assert_gte(counts1.consonants, 2, "First draw should have at least 2 consonants")
+
+	# Draw second hand
+	var hand2 = bag.draw_balanced_tiles(7)
+	var counts2 = _count_vowels_consonants(hand2)
+	assert_gte(counts2.vowels, 2, "Second draw should have at least 2 vowels")
+	assert_gte(counts2.consonants, 2, "Second draw should have at least 2 consonants")
+
+
+func test_balanced_draw_no_duplicates_in_two_hands():
+	var bag = autofree(TileBag.new())
+	var hand1 = bag.draw_balanced_tiles(7)
+	var hand2 = bag.draw_balanced_tiles(7)
+
+	# Verify they're different hands (not the same tiles)
+	assert_ne(hand1 + hand2, "", "Both hands should have tiles")
+	assert_ne(hand1, hand2, "Two consecutive balanced draws should not be identical")
+
+------------------------------------------------------------------------
+FILE: tests/unit/test_trie.gd
+PATH: /home/ilia/Documents/GIT/scrabble_project/tests/unit/test_trie.gd
+------------------------------------------------------------------------
+extends GutTest
+
+const Trie = preload("res://scripts/game/Trie.gd")
+
+var _trie
+
+
+func before_each() -> void:
+	_trie = autofree(Trie.new())
+
+
+func test_empty_trie_search_returns_false() -> void:
+	assert_false(_trie.search("HELLO"))
+
+
+func test_empty_trie_starts_with_returns_false() -> void:
+	assert_false(_trie.starts_with("HE"))
+
+
+func test_insert_and_search_word() -> void:
+	_trie.insert("CAT")
+	assert_true(_trie.search("CAT"))
+
+
+func test_search_nonexistent_word() -> void:
+	_trie.insert("CAT")
+	assert_false(_trie.search("DOG"))
+
+
+func test_starts_with_existing_prefix() -> void:
+	_trie.insert("CAT")
+	_trie.insert("CAR")
+	assert_true(_trie.starts_with("CA"))
+
+
+func test_starts_with_nonexistent_prefix() -> void:
+	_trie.insert("CAT")
+	assert_false(_trie.starts_with("DO"))
+
+
+func test_word_is_not_prefix_of_another_word() -> void:
+	_trie.insert("CAT")
+	_trie.insert("CATS")
+	assert_true(_trie.search("CAT"))
+	assert_true(_trie.search("CATS"))
+
+
+func test_multiple_words() -> void:
+	_trie.insert("HELLO")
+	_trie.insert("HELP")
+	_trie.insert("HELPER")
+	assert_true(_trie.search("HELLO"))
+	assert_true(_trie.search("HELP"))
+	assert_true(_trie.search("HELPER"))
+	assert_false(_trie.search("HEL"))
+
+
+func test_starts_with_exact_word_is_also_prefix() -> void:
+	_trie.insert("HELLO")
+	assert_true(_trie.starts_with("HELLO"))
+
+
+func test_get_node_returns_valid_node() -> void:
+	_trie.insert("TEST")
+	var node = _trie.get_node("TE")
+	assert_not_null(node)
+	assert_false(node.is_end)
+
+	var full_node = _trie.get_node("TEST")
+	assert_not_null(full_node)
+	assert_true(full_node.is_end)
+
+
+func test_get_node_nonexistent_returns_null() -> void:
+	_trie.insert("TEST")
+	var node = _trie.get_node("XYZ")
+	assert_null(node)
+

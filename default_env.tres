@@ -1,0 +1,10 @@
+[gd_resource type="Environment" load_steps=2 format=3 uid="uid://default_env"]
+
+[sub_resource type="Sky" id="Sky_1"]
+
+[resource]
+background_mode = 2
+background_sky = SubResource("Sky_1")
+background_sky_custom_fov = 0.0
+ambient_light_color = Color(0.1, 0.1, 0.15, 1)
+fog_enabled = false

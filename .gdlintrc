@@ -1,0 +1,9 @@
+max-line-length: 160
+unused-argument: null
+function-variable-name: '(_?[a-z][a-z0-9]*(_[a-z0-9]+)*|[A-Z][A-Z0-9]*(_[A-Z0-9]+)*)'
+class-variable-name: _?[a-z][a-z0-9]*(_[a-z0-9]+)*
+function-argument-name: _?[a-z][a-z0-9]*(_[a-z0-9]+)*
+signal-name: '[a-z][a-z0-9]*(_[a-z0-9]+)*'
+excluded_directories: !!set
+  .git: null
+  addons: null

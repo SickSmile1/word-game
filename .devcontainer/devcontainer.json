@@ -1,0 +1,38 @@
+{
+  "name": "Default Linux Universal",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "configureZshAsDefaultShell": true,
+      "username": "vscode"
+    },
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    }
+  },
+  "postCreateCommand": "npm install -g @anthropic-ai/claude-code",
+  /*"runArgs": [
+    "--env-file",
+    "${localWorkspaceFolder}/.devcontainer/devcontainer.env"
+  ],*/
+  // 2. Persistent Storage (Keeps you from having to log in to Claude every time the container resets)
+  "mounts": [
+    "source=${localEnv:HOME}/.zsh_history,target=/home/vscode/.zsh_history,type=bind"
+  ],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "editor.formatOnSave": true
+      },
+      "extensions": [
+        "usernamehw.errorlens",
+      ]
+    }
+  },
+  // Ensures standard environment permissions link up cleanly
+  "remoteUser": "vscode",
+  "containerUser": "vscode"
+}
