@@ -4,6 +4,7 @@ signal session_started(host: bool)
 signal peer_connected
 signal peer_disconnected
 signal net_error(reason: String)
+signal host_connected(room_code: String, slot: int)
 signal submit_action_received(sender_id: int, action: Dictionary)
 signal state_received(state: Dictionary)
 
@@ -40,8 +41,8 @@ func _init_client(room_code: String, host: bool) -> void:
 		_client.start_guest(room_code)
 
 
-func _on_host_connected(_room: String, _slot: int) -> void:
-	pass  # room/slot informational; used by Lobby
+func _on_host_connected(room: String, slot: int) -> void:
+	host_connected.emit(room, slot)
 
 
 func _on_connection_open(pc: WebRTCPeerConnection) -> void:
