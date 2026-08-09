@@ -100,4 +100,8 @@ func test_score_cross_word_calculated_correctly_when_not_placed() -> void:
 
 	# Expected score: Main "CA" (6 due to DL on A) + Cross "CT" (5) = 11.
 	# (Previously this would return 5 because the tiles were not placed on the board).
-	assert_eq(score, 11, "Should calculate cross word correctly even if new tiles are not placed on board yet")
+	assert_eq(
+		score,
+		11,
+		"Should calculate cross word correctly even if new tiles are not placed on board yet"
+	)

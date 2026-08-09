@@ -79,12 +79,15 @@ func _build_guest_state() -> Dictionary:
 func serialize_placements() -> Array:
 	var arr: Array = []
 	for pp in game._pending_placements:
-		arr.append(
-			{
-				"pos": {"x": pp.pos.x, "y": pp.pos.y},
-				"letter": pp.letter,
-				"rack_index": pp.rack_index,
-			}
+		(
+			arr
+			. append(
+				{
+					"pos": {"x": pp.pos.x, "y": pp.pos.y},
+					"letter": pp.letter,
+					"rack_index": pp.rack_index,
+				}
+			)
 		)
 	return arr
 
@@ -108,12 +111,16 @@ func _on_net_action(sender_id: int, action: Dictionary) -> void:
 		"play":
 			game._pending_placements = []
 			for t in action.get("tiles", []):
-				game._pending_placements.append(
-					{
-						pos = Vector2i(int(t.pos.x), int(t.pos.y)),
-						letter = String(t.letter),
-						rack_index = int(t.rack_index),
-					}
+				(
+					game
+					. _pending_placements
+					. append(
+						{
+							pos = Vector2i(int(t.pos.x), int(t.pos.y)),
+							letter = String(t.letter),
+							rack_index = int(t.rack_index),
+						}
+					)
 				)
 			var result = game._validate_move()
 			if not result.valid:

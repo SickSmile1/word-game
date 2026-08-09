@@ -2,10 +2,12 @@ extends GutTest
 
 const GameSession = preload("res://scripts/game/GameSession.gd")
 
+
 func _session() -> GameSession:
 	var s := GameSession.new()
 	s.new_game()
 	return s
+
 
 func test_new_game_draws_racks_and_host_starts():
 	var s := _session()
@@ -14,6 +16,7 @@ func test_new_game_draws_racks_and_host_starts():
 	assert_eq(s.turn, GameSession.Player.P0)
 	assert_eq(s.scores, [0, 0])
 	assert_false(s.game_over)
+
 
 func test_self_snapshot_is_full_fidelity():
 	var s := _session()
@@ -29,6 +32,7 @@ func test_self_snapshot_is_full_fidelity():
 	assert_eq(restored.turn, s.turn)
 	assert_eq(restored.scores, s.scores)
 
+
 func test_guest_snapshot_redacts_host_rack_and_bag():
 	var s := _session()
 	var data := s.to_dict_for_player(GameSession.Player.P1)
@@ -39,12 +43,14 @@ func test_guest_snapshot_redacts_host_rack_and_bag():
 	assert_eq(data.board.size(), 15)
 	assert_eq(data.version, GameSession.PROTOCOL_VERSION)
 
+
 func test_guest_restore_never_materializes_bag():
 	var s := _session()
 	var data := s.to_dict_for_player(GameSession.Player.P1)
 	var guest := GameSession.from_dict_for_player(data, GameSession.Player.P1)
 	assert_eq(guest.bag_pool, [], "guest must not hold bag tiles")
 	assert_eq(guest.bag_count, data.bag_count)
+
 
 func test_round_trip_keeps_scores_passes_and_game_over():
 	var s := _session()

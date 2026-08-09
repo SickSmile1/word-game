@@ -39,14 +39,19 @@ func get_save_list() -> Array[Dictionary]:
 		var data = load_data(i)
 		if data.is_empty():
 			continue
-		result.append({
-			"slot": i,
-			"difficulty": data.get("difficulty_name", "Unknown"),
-			"timestamp": data.get("timestamp", ""),
-			"difficulty_num": data.get("difficulty", 0),
-			"human_score": data.get("human_score", 0),
-			"ai_score": data.get("ai_score", 0),
-		})
+		(
+			result
+			. append(
+				{
+					"slot": i,
+					"difficulty": data.get("difficulty_name", "Unknown"),
+					"timestamp": data.get("timestamp", ""),
+					"difficulty_num": data.get("difficulty", 0),
+					"human_score": data.get("human_score", 0),
+					"ai_score": data.get("ai_score", 0),
+				}
+			)
+		)
 	result.sort_custom(func(a, b): return a.timestamp > b.timestamp)
 	return result
 

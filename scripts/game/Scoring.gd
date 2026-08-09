@@ -106,7 +106,7 @@ static func _calculate_cross(board, row: int, col: int, horizontal: bool) -> int
 	var word_mult := 1
 	for p in positions:
 		var lv = Tiles.get_value(board.get_tile(p.x, p.y))
-		var is_new = (p.x == row and p.y == col)
+		var is_new = p.x == row and p.y == col
 		var bonus = board.get_bonus(p.x, p.y) if is_new else Board.BONUS_NONE
 		match bonus:
 			Board.BONUS_DL:

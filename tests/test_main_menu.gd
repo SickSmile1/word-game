@@ -9,12 +9,12 @@ func before_each() -> void:
 
 
 func test_initial_state_is_main() -> void:
-	assert_eq(_menu._state, _menu.MenuState.MAIN)
+	assert_eq(_menu._state, MainMenu.MenuState.MAIN)
 
 
 func test_start_button_shows_start_panel() -> void:
 	_menu._on_start_pressed()
-	assert_eq(_menu._state, _menu.MenuState.START)
+	assert_eq(_menu._state, MainMenu.MenuState.START)
 
 
 func test_start_panel_visible_in_start_state() -> void:
@@ -26,7 +26,7 @@ func test_start_panel_visible_in_start_state() -> void:
 
 func test_settings_button_shows_settings_panel() -> void:
 	_menu._on_settings_pressed()
-	assert_eq(_menu._state, _menu.MenuState.SETTINGS)
+	assert_eq(_menu._state, MainMenu.MenuState.SETTINGS)
 	assert_true(_menu.settings_panel.visible)
 	assert_false(_menu.menu_container.visible)
 
@@ -34,13 +34,13 @@ func test_settings_button_shows_settings_panel() -> void:
 func test_close_settings_returns_to_main() -> void:
 	_menu._on_settings_pressed()
 	_menu._on_close_settings_pressed()
-	assert_eq(_menu._state, _menu.MenuState.MAIN)
+	assert_eq(_menu._state, MainMenu.MenuState.MAIN)
 
 
 func test_back_start_returns_to_main() -> void:
 	_menu._on_start_pressed()
 	_menu._on_back_start_pressed()
-	assert_eq(_menu._state, _menu.MenuState.MAIN)
+	assert_eq(_menu._state, MainMenu.MenuState.MAIN)
 
 
 func test_quit_calls_tree_quit() -> void:

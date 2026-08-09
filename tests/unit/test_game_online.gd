@@ -3,6 +3,7 @@ extends GutTest
 const GameSession = preload("res://scripts/game/GameSession.gd")
 const GameScene := preload("res://scenes/game/Game.tscn")
 
+
 func test_host_snapshot_guest_restore_roundtrip():
 	var host := GameSession.new()
 	host.new_game()
@@ -15,6 +16,7 @@ func test_host_snapshot_guest_restore_roundtrip():
 	assert_eq(guest.racks[GameSession.Player.P1], host.racks[GameSession.Player.P1])
 	assert_eq(guest.turn, GameSession.Player.P1)
 
+
 func test_guest_turn_render_when_its_not_your_turn():
 	var s := GameSession.new()
 	s.new_game()
@@ -26,9 +28,11 @@ func test_guest_turn_render_when_its_not_your_turn():
 	var me := GameSession.Player.P1
 	assert_false(guest.turn == me)
 
+
 func test_game_scene_loads_with_online_script():
 	assert_not_null(load("res://scripts/ui/GameOnline.gd"), "GameOnline.gd must exist")
 	assert_not_null(GameScene, "Game.tscn must exist")
+
 
 func test_game_scene_instantiates_offline():
 	var game = GameScene.instantiate()

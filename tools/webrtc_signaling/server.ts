@@ -35,19 +35,30 @@ export function serve(kv: Deno.Kv): void {
 
     let room = "";
     let channel: BroadcastChannel | null = null;
-    const peer_id = crypto.randomUUID();
+    const peer_id = crypto.randomUUID().slice(0, 8);
+    const tag = () => `${peer_id}${room ? ` room=${room}` : ""}`;
+
+    const send = (obj: Record<string, unknown>) => {
+      const text = JSON.stringify(obj);
+      console.log(`[ws] ${tag()} -> send ${text}`);
+      socket.send(text);
+    };
 
     const open_channel = (code: string) => {
       channel = new BroadcastChannel(`room:${code}`);
       channel.onmessage = (ev) => {
         const msg = JSON.parse(String(ev.data));
         if (msg.peer === peer_id) return; // ignore our own echo
+        console.log(`[ws] ${tag()} -> relay ${String(ev.data)}`);
         socket.send(JSON.stringify(msg));
       };
     };
 
+    socket.onopen = () => console.log(`[ws] ${tag()} open`);
+
     socket.onmessage = async (ev) => {
       const msg = parse_message(String(ev.data));
+      console.log(`[ws] ${tag()} <- recv ${String(ev.data)} (parsed=${msg !== null})`);
       if (!msg) return;
 
       switch (msg.type) {
@@ -55,36 +66,39 @@ export function serve(kv: Deno.Kv): void {
           room = await resolve_room(kv, String(msg.room ?? ""));
           await kv.set(["room", room], { players: 1 }, { expireIn: ROOM_TTL_MS });
           open_channel(room);
-          socket.send(JSON.stringify({ type: "created", room, slot: 0 }));
+          send({ type: "created", room, slot: 0 });
           break;
         }
         case "join": {
           room = String(msg.room);
           const entry = await kv.get(["room", room]);
           if (!entry.value) {
-            socket.send(JSON.stringify({ type: "error", reason: "not_found" }));
+            send({ type: "error", reason: "not_found" });
             break;
           }
           const players = (entry.value as { players: number }).players;
           if (players >= MAX_PLAYERS) {
-            socket.send(JSON.stringify({ type: "error", reason: "room_full" }));
+            send({ type: "error", reason: "room_full" });
             break;
           }
           await kv.set(["room", room], { players: players + 1 }, { expireIn: ROOM_TTL_MS });
           open_channel(room);
-          socket.send(JSON.stringify({ type: "joined", room, slot: players }));
+          send({ type: "joined", room, slot: players });
           break;
         }
         case "session":
         case "candidate":
           if (channel) {
             channel.postMessage(JSON.stringify({ peer: peer_id, type: msg.type, ...msg }));
+          } else {
+            console.log(`[ws] ${tag()} <- dropped ${msg.type}: no channel`);
           }
           break;
       }
     };
 
     socket.onclose = () => {
+      console.log(`[ws] ${tag()} close`);
       channel?.close();
       if (room) kv.delete(["room", room]);
     };

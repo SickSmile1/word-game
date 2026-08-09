@@ -157,7 +157,9 @@ func _populate_slot_list() -> void:
 		btn.add_theme_stylebox_override("hover", style)
 		btn.add_theme_stylebox_override("pressed", style)
 		btn.add_theme_font_size_override("font_size", 20)
-		btn.add_theme_color_override("font_color", Color(1, 1, 1, 1) if Settings.dark_mode else Color(0.08, 0.06, 0.12, 1))
+		btn.add_theme_color_override(
+			"font_color", Color(1, 1, 1, 1) if Settings.dark_mode else Color(0.08, 0.06, 0.12, 1)
+		)
 		btn.add_theme_color_override("font_hover_color", Color(0.91, 0.27, 0.38, 1))
 		btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		var slot_num = save.get("slot", 0)
@@ -167,7 +169,9 @@ func _populate_slot_list() -> void:
 
 func _make_slot_style() -> StyleBoxFlat:
 	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.13, 0.13, 0.24, 1) if Settings.dark_mode else Color(0.88, 0.84, 0.78, 1)
+	style.bg_color = (
+		Color(0.13, 0.13, 0.24, 1) if Settings.dark_mode else Color(0.88, 0.84, 0.78, 1)
+	)
 	style.border_width_left = 2
 	style.border_width_top = 2
 	style.border_width_right = 2
@@ -284,8 +288,15 @@ func _style_menu_theme(dark: bool) -> void:
 	var muted_font: Color = Color(0.75, 0.75, 0.85, 1) if dark else Color(0.50, 0.50, 0.60, 1)
 	var toggle_font: Color = Color(0.70, 0.70, 0.82, 1) if dark else Color(0.40, 0.40, 0.52, 1)
 
-	for b in [%StartButton, %ContinueButton, %SettingsButton, %QuitButton,
-			  %OnlineButton, %VsAiButton, %BackStartButton]:
+	for b in [
+		%StartButton,
+		%ContinueButton,
+		%SettingsButton,
+		%QuitButton,
+		%OnlineButton,
+		%VsAiButton,
+		%BackStartButton
+	]:
 		b.add_theme_stylebox_override("normal", btn_style)
 		b.add_theme_stylebox_override("hover", btn_style)
 		b.add_theme_stylebox_override("pressed", btn_style)
@@ -343,7 +354,9 @@ func _style_menu_theme(dark: bool) -> void:
 	for rp in row_paths:
 		var found := settings_root.get_node_or_null(rp)
 		if found:
-			found.add_theme_color_override("font_color", Color(1, 1, 1, 1) if dark else Color(0.08, 0.06, 0.12, 1))
+			found.add_theme_color_override(
+				"font_color", Color(1, 1, 1, 1) if dark else Color(0.08, 0.06, 0.12, 1)
+			)
 
 	for vl in [%MusicValue, %EffectsValue, %OverallValue]:
 		vl.add_theme_color_override("font_color", muted_font)

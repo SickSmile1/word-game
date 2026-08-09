@@ -7,7 +7,8 @@ signal connection_open(pc: WebRTCPeerConnection)
 const Config = preload("res://scripts/net/SignalingConfig.gd")
 
 const ICE_SERVERS := {
-	"iceServers": [
+	"iceServers":
+	[
 		{"urls": ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"]},
 	],
 }

@@ -77,9 +77,7 @@ func _build_slots():
 				_on_slot_clicked(idx)
 		slot.gui_input.connect(handler.bind(i))
 		slot.set_drag_forwarding(
-			_make_drag_data.bind(i),
-			func(_at, _data): return false,
-			func(_at, _data): pass
+			_make_drag_data.bind(i), func(_at, _data): return false, func(_at, _data): pass
 		)
 
 		var bg = ColorRect.new()

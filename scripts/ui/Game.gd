@@ -942,7 +942,9 @@ func _style_scene_theme(dark: bool):
 	var diff_sub = %DifficultyPanel.get_node("DifficultyVBox/DiffSubtitle")
 	diff_sub.add_theme_color_override("font_color", body_font)
 
-	%PlayerScore.add_theme_color_override("font_color", Color(0.24, 0.67, 0.36, 1) if dark else Color(0.20, 0.58, 0.30, 1))
+	%PlayerScore.add_theme_color_override(
+		"font_color", Color(0.24, 0.67, 0.36, 1) if dark else Color(0.20, 0.58, 0.30, 1)
+	)
 	%AIScore.add_theme_color_override("font_color", Color(0.91, 0.27, 0.38, 1))
 	%StatusLabel.add_theme_color_override("font_color", body_font)
 
@@ -950,7 +952,9 @@ func _style_scene_theme(dark: bool):
 	overlay_title.add_theme_color_override("font_color", accent_font)
 
 	var overlay_scores = game_overlay.get_node("OverlayPanel/OverlayVBox/FinalScores")
-	overlay_scores.add_theme_color_override("font_color", Color(1, 1, 1, 1) if dark else Color(0.08, 0.06, 0.12, 1))
+	overlay_scores.add_theme_color_override(
+		"font_color", Color(1, 1, 1, 1) if dark else Color(0.08, 0.06, 0.12, 1)
+	)
 
 	var overlay_bg = game_overlay.get_node("OverlayBg")
 	overlay_bg.color = Color(0.06, 0.06, 0.14, 0.78) if dark else Color(0.93, 0.90, 0.83, 0.88)

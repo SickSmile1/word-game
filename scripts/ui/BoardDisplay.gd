@@ -191,9 +191,7 @@ func _create_cell(row: int, col: int) -> Control:
 				cell_clicked.emit(row, col)
 	)
 	cell.set_drag_forwarding(
-		func(_at): return null,
-		_can_accept_drop.bind(row, col),
-		_on_tile_dropped.bind(row, col)
+		func(_at): return null, _can_accept_drop.bind(row, col), _on_tile_dropped.bind(row, col)
 	)
 
 	var bg = ColorRect.new()
