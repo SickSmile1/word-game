@@ -55,9 +55,12 @@ export function serve(kv: Deno.Kv): void {
       channel = new BroadcastChannel(`room:${code}`);
       channel.onmessage = (ev) => {
         try {
-          const msg = typeof ev.data === "string" ? JSON.parse(ev.data) : ev.data;
-          if (msg && msg.peer === peer_id) return; // ignore our own echo
-          const outStr = typeof msg === "string" ? msg : JSON.stringify(msg);
+          let msg: any = ev.data;
+          if (typeof msg === "string") {
+            try { msg = JSON.parse(msg); } catch {}
+          }
+          if (msg && typeof msg === "object" && msg.peer === peer_id) return;
+          const outStr = typeof ev.data === "string" ? ev.data : JSON.stringify(ev.data);
           console.log(`[ws] ${tag()} -> relay ${outStr}`);
           socket.send(outStr);
         } catch (err) {
