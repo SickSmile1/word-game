@@ -1,7 +1,7 @@
 class_name SignalingConfig
 extends RefCounted
 
-const DEFAULT_URL := "wss://scrabble-signal.deno.dev/"
+const DEFAULT_URL := "wss://scrabble-signal.iliafe020.deno.net/"
 
 
 static func get_url() -> String:
