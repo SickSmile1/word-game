@@ -50,7 +50,8 @@ func _finish_load(thread: Thread = null) -> void:
 
 
 # The single-threaded web export cannot run Threads, so load the word list on
-# the main thread in small time-sliced chunks to keep the UI responsive.
+# the main thread in flat time-sliced chunks to keep the UI responsive without
+# building up a recursive coroutine call stack.
 func _load_chunked() -> void:
 	_chunk_file = FileAccess.open(WORDLIST_PATH, FileAccess.READ)
 	if not _chunk_file:
@@ -58,27 +59,24 @@ func _load_chunked() -> void:
 		trie = null
 		_finish_load()
 		return
-	await _read_chunk()
 
-
-func _read_chunk() -> void:
-	var start := Time.get_ticks_msec()
-	var lines_in_chunk := 0
 	while not _chunk_file.eof_reached():
-		var word := _chunk_file.get_line().strip_edges().to_upper()
-		if word.length() >= 2:
-			trie.insert(word)
-			word_count += 1
-		lines_in_chunk += 1
-		if lines_in_chunk % 500 == 0:
-			if Time.get_ticks_msec() - start > MAX_CHUNK_MS:
-				break
-	if _chunk_file.eof_reached():
-		_chunk_file.close()
-		_finish_load()
-	else:
-		await get_tree().process_frame
-		await _read_chunk()
+		var start := Time.get_ticks_msec()
+		var lines_in_chunk := 0
+		while not _chunk_file.eof_reached():
+			var word := _chunk_file.get_line().strip_edges().to_upper()
+			if word.length() >= 2:
+				trie.insert(word)
+				word_count += 1
+			lines_in_chunk += 1
+			if lines_in_chunk % 500 == 0:
+				if Time.get_ticks_msec() - start > MAX_CHUNK_MS:
+					break
+		if not _chunk_file.eof_reached():
+			await get_tree().process_frame
+
+	_chunk_file.close()
+	_finish_load()
 
 
 func is_valid_word(word: String) -> bool:
