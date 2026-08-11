@@ -42,13 +42,15 @@ func _init():
 func get_tile(row: int, col: int) -> String:
 	if not _is_on_board(row, col):
 		return ""
-	return _cells[row][col] if _cells[row][col] != null else ""
+	var val = _cells[row][col]
+	return val if val != null else ""
 
 
 func is_occupied(row: int, col: int) -> bool:
 	if not _is_on_board(row, col):
 		return false
-	return _cells[row][col] != null
+	var val = _cells[row][col]
+	return val != null and not (val as String).is_empty()
 
 
 func is_empty_at(row: int, col: int) -> bool:
@@ -57,9 +59,13 @@ func is_empty_at(row: int, col: int) -> bool:
 
 func place_tile(row: int, col: int, letter: String) -> void:
 	if _is_on_board(row, col):
-		if _cells[row][col] == null:
+		var clean_letter := letter.to_upper().strip_edges() if letter != null else ""
+		if clean_letter.is_empty():
+			remove_tile(row, col)
+			return
+		if _cells[row][col] == null or (_cells[row][col] as String).is_empty():
 			_occupied_count += 1
-		_cells[row][col] = letter.to_upper()
+		_cells[row][col] = clean_letter
 
 
 func remove_tile(row: int, col: int) -> void:

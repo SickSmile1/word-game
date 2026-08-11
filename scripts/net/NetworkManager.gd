@@ -27,9 +27,13 @@ func start_guest(room_code: String) -> bool:
 	return true
 
 
+var _peer_connected_emitted := false
+
+
 func _init_client(room_code: String, host: bool) -> void:
 	is_host = host
 	remote_peer_id = 2 if host else 1
+	_peer_connected_emitted = false
 	_client = SignalingClient.new()
 	add_child(_client)
 	_client.peer_created.connect(_on_peer_created)
@@ -57,25 +61,33 @@ func _on_peer_created(pc: WebRTCPeerConnection) -> void:
 		_mp.create_client(2)
 		_mp.add_peer(pc, 1)
 
+	multiplayer.multiplayer_peer = _mp
+	if not multiplayer.peer_connected.is_connected(_on_peer_connected):
+		multiplayer.peer_connected.connect(_on_peer_connected)
+		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+
 
 func _on_host_connected(room: String, slot: int) -> void:
 	host_connected.emit(room, slot)
 
 
 func _on_connection_open(_pc: WebRTCPeerConnection) -> void:
-	print("[Net] WebRTC Connected! Setting multiplayer.multiplayer_peer...")
-	multiplayer.multiplayer_peer = _mp
+	print("[Net] WebRTC Connected!")
 	active = true
-	if not multiplayer.peer_connected.is_connected(_on_peer_connected):
-		multiplayer.peer_connected.connect(_on_peer_connected)
-		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	session_started.emit(is_host)
+	_notify_peer_connected()
+
+
+func _notify_peer_connected() -> void:
+	if _peer_connected_emitted:
+		return
+	_peer_connected_emitted = true
 	print("[Net] Emitting peer_connected to transition UI to Game.tscn...")
 	peer_connected.emit()
 
 
 func _on_peer_connected(_id: int) -> void:
-	peer_connected.emit()
+	_notify_peer_connected()
 
 
 func _on_peer_disconnected(_id: int) -> void:

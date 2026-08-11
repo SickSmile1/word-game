@@ -64,7 +64,11 @@ static func from_dict_for_player(data: Dictionary, _me: int) -> GameSession:
 	for r in range(board_data.size()):
 		var row: Array = board_data[r]
 		for c in range(row.size()):
-			if row[c] != null:
+			if (
+				row[c] != null
+				and typeof(row[c]) == TYPE_STRING
+				and not (row[c] as String).is_empty()
+			):
 				s.board.place_tile(r, c, row[c])
 	s.scores = (data.get("scores", [0, 0]) as Array).duplicate()
 	s.consecutive_passes = int(data.get("passes", 0))

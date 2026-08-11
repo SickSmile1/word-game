@@ -20,6 +20,8 @@ func setup() -> void:
 		Net.submit_action_received.connect(_on_net_action)
 		start_online_game()
 	else:
+		if game._board == null:
+			game._board = Board.new()
 		game._my_turn = false
 		game._state = game.GameState.WAITING
 		game._set_status("Waiting for host…")

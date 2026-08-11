@@ -16,7 +16,7 @@ const BUTTON_HEIGHT := 58.0
 
 var _state: int = GameState.DIFFICULTY_SELECT
 var _difficulty: int = AIPlayer.Difficulty.HARD
-var _board: Board
+var _board: Board = Board.new()
 var _bag: TileBag
 var _human_rack: TileRack
 var _ai_rack: TileRack
@@ -709,6 +709,8 @@ func _get_pending_idx(row: int, col: int) -> int:
 
 
 func _update_display():
+	if _board == null:
+		_board = Board.new()
 	var preview_board = _board.duplicate()
 	for pp in _pending_placements:
 		preview_board.place_tile(pp.pos.x, pp.pos.y, pp.letter)
