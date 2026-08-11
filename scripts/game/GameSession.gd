@@ -16,6 +16,7 @@ var scores: Array[int] = [0, 0]
 var consecutive_passes: int = 0
 var turn: int = Player.P0
 var game_over: bool = false
+var last_action_text: String = ""
 
 
 func new_game() -> void:
@@ -29,6 +30,7 @@ func new_game() -> void:
 	consecutive_passes = 0
 	turn = Player.P0
 	game_over = false
+	last_action_text = ""
 
 
 func to_dict_for_player(me: int) -> Dictionary:
@@ -47,6 +49,7 @@ func to_dict_for_player(me: int) -> Dictionary:
 		"turn": turn,
 		"game_over": game_over,
 		"bag_count": bag_pool.size(),
+		"last_action": last_action_text,
 	}
 
 	if me == Player.P0:
@@ -75,6 +78,7 @@ static func from_dict_for_player(data: Dictionary, _me: int) -> GameSession:
 	s.turn = int(data.get("turn", 0))
 	s.game_over = bool(data.get("game_over", false))
 	s.bag_count = int(data.get("bag_count", 0))
+	s.last_action_text = String(data.get("last_action", ""))
 	var racks_data: Array = data.get("racks", ["", ""])
 	s.racks[Player.P0] = racks_data[Player.P0]
 	s.racks[Player.P1] = racks_data[Player.P1]

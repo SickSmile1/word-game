@@ -111,6 +111,9 @@ func _on_net_action(sender_id: int, action: Dictionary) -> void:
 
 	match action.get("type", ""):
 		"play":
+			if not WordDict.is_ready:
+				game._set_status("Loading dictionary...")
+				await WordDict.dictionary_ready
 			game._pending_placements = []
 			for t in action.get("tiles", []):
 				(
@@ -126,30 +129,35 @@ func _on_net_action(sender_id: int, action: Dictionary) -> void:
 				)
 			var result = game._validate_move()
 			if not result.valid:
-				game._set_status("Rejected invalid move")
+				print("[Net] Rejected guest move: ", result.reason)
+				var fail_msg: String = "Move rejected: " + String(result.reason)
+				game._set_status(fail_msg)
+				_broadcast(fail_msg)
 				return
 			_apply_guest_move_online(result)
 		"pass":
 			game._consecutive_passes += 1
 			game._reset_turn_state()
-			game._set_status("Opponent passed")
+			var msg := "Opponent passed"
+			game._set_status(msg)
 			game._state = game.GameState.HUMAN_TURN
 			game._my_turn = true
 			game._update_display()
 			_check_end_game_online()
-			_broadcast()
+			_broadcast(msg)
 		"exchange":
 			var letters: String = action.get("letters", "")
 			for c in letters:
 				game._ai_rack.remove_letter(c)
 			game._ai_rack.add_tiles(game._bag.exchange(letters))
 			game._reset_turn_state()
-			game._set_status("Opponent exchanged %d tiles" % letters.length())
+			var msg := "Opponent exchanged %d tiles" % letters.length()
+			game._set_status(msg)
 			game._state = game.GameState.HUMAN_TURN
 			game._my_turn = true
 			game._update_display()
 			_check_end_game_online()
-			_broadcast()
+			_broadcast(msg)
 		"rematch":
 			start_online_game()
 
@@ -167,24 +175,26 @@ func apply_human_move(result: Dictionary) -> void:
 	game._placed_rack_indices = []
 	game._selected_rack_index = -1
 	game._consecutive_passes = 0
-	game._set_status('"%s" scores %d!' % [word, score])
+	var msg := '"%s" scores %d!' % [word, score]
+	game._set_status(msg)
 	game._draw_human_tiles()
 	game._state = game.GameState.WAITING
 	game._my_turn = false
 	game._update_display()
 	_check_end_game_online()
-	_broadcast()
+	_broadcast(msg)
 
 
 func host_pass() -> void:
 	game._consecutive_passes += 1
 	game._reset_turn_state()
-	game._set_status("You passed")
+	var msg := "You passed"
+	game._set_status(msg)
 	game._state = game.GameState.WAITING
 	game._my_turn = false
 	game._update_display()
 	_check_end_game_online()
-	_broadcast()
+	_broadcast(msg)
 
 
 func host_exchange(letters: String) -> void:
@@ -195,7 +205,8 @@ func host_exchange(letters: String) -> void:
 	game._my_turn = false
 	game._update_display()
 	_check_end_game_online()
-	_broadcast()
+	var msg := "Host exchanged %d tiles" % letters.length()
+	_broadcast(msg)
 
 
 func _apply_guest_move_online(result: Dictionary) -> void:
@@ -211,13 +222,14 @@ func _apply_guest_move_online(result: Dictionary) -> void:
 	game._placed_rack_indices = []
 	game._selected_rack_index = -1
 	game._consecutive_passes = 0
-	game._set_status('Opponent played "%s" for %d' % [word, score])
+	var msg := 'Opponent played "%s" for %d' % [word, score]
+	game._set_status(msg)
 	game._draw_ai_tiles()
 	game._state = game.GameState.HUMAN_TURN
 	game._my_turn = true
 	game._update_display()
 	_check_end_game_online()
-	_broadcast()
+	_broadcast(msg)
 
 
 func _check_end_game_online() -> bool:
@@ -272,7 +284,10 @@ func _on_net_state(state: Dictionary) -> void:
 	game._my_turn = (s.turn == me)
 	game._state = game.GameState.HUMAN_TURN if game._my_turn else game.GameState.WAITING
 	game._reset_turn_state()
-	game._set_status("Your turn" if game._my_turn else "Opponent's turn")
+	if not s.last_action_text.is_empty():
+		game._set_status(s.last_action_text)
+	else:
+		game._set_status("Your turn" if game._my_turn else "Opponent's turn")
 	game._update_display()
 
 	if s.game_over:
@@ -290,5 +305,8 @@ func _on_net_disconnect() -> void:
 	game.get_tree().change_scene_to_file("res://scenes/main_menu/MainMenu.tscn")
 
 
-func _broadcast() -> void:
-	Net.send_state(_build_guest_state())
+func _broadcast(msg: String = "") -> void:
+	var state_dict := _build_guest_state()
+	if not msg.is_empty():
+		state_dict["last_action"] = msg
+	Net.send_state(state_dict)

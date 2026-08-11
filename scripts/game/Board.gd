@@ -116,7 +116,7 @@ func get_anchors() -> Array:
 
 	for r in range(SIZE):
 		for c in range(SIZE):
-			if _cells[r][c] != null:
+			if is_occupied(r, c):
 				continue
 			if _has_occupied_neighbor(r, c):
 				anchors.append(Vector2i(r, c))
@@ -129,7 +129,7 @@ func _has_occupied_neighbor(row: int, col: int) -> bool:
 	for d in dirs:
 		var nr = row + d.x
 		var nc = col + d.y
-		if _is_on_board(nr, nc) and _cells[nr][nc] != null:
+		if _is_on_board(nr, nc) and is_occupied(nr, nc):
 			return true
 	return false
 
@@ -141,18 +141,18 @@ func get_existing_word(row: int, col: int, horizontal: bool) -> Dictionary:
 	var positions: Array = []
 
 	if horizontal:
-		while start_col > 0 and _cells[row][start_col - 1] != null:
+		while start_col > 0 and is_occupied(row, start_col - 1):
 			start_col -= 1
 		var c = start_col
-		while c < SIZE and _cells[row][c] != null:
+		while c < SIZE and is_occupied(row, c):
 			word += _cells[row][c]
 			positions.append(Vector2i(row, c))
 			c += 1
 	else:
-		while start_row > 0 and _cells[start_row - 1][col] != null:
+		while start_row > 0 and is_occupied(start_row - 1, col):
 			start_row -= 1
 		var r = start_row
-		while r < SIZE and _cells[r][col] != null:
+		while r < SIZE and is_occupied(r, col):
 			word += _cells[r][col]
 			positions.append(Vector2i(r, col))
 			r += 1
@@ -175,17 +175,17 @@ func get_all_words(trie) -> Array:
 
 	for r in range(SIZE):
 		for c in range(SIZE):
-			if _cells[r][c] == null or visited[r][c]:
+			if not is_occupied(r, c) or visited[r][c]:
 				continue
 
-			if c + 1 < SIZE and _cells[r][c + 1] != null:
+			if c + 1 < SIZE and is_occupied(r, c + 1):
 				var w = get_existing_word(r, c, true)
 				if w.word.length() > 1:
 					words.append(w)
 					for p in w.positions:
 						visited[p.x][p.y] = true
 
-			if r + 1 < SIZE and _cells[r + 1][c] != null:
+			if r + 1 < SIZE and is_occupied(r + 1, c):
 				var w = get_existing_word(r, c, false)
 				if w.word.length() > 1:
 					words.append(w)
@@ -213,7 +213,7 @@ func is_move_connected(
 		for d in dirs:
 			var nr = tp.x + d.x
 			var nc = tp.y + d.y
-			if _is_on_board(nr, nc) and _cells[nr][nc] != null:
+			if _is_on_board(nr, nc) and is_occupied(nr, nc):
 				return true
 
 	return false
@@ -223,7 +223,7 @@ func duplicate():
 	var b = get_script().new()
 	for r in range(SIZE):
 		for c in range(SIZE):
-			if _cells[r][c] != null:
+			if is_occupied(r, c):
 				b._cells[r][c] = _cells[r][c]
 	b._occupied_count = _occupied_count
 	return b
