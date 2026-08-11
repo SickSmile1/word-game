@@ -81,21 +81,17 @@ func _build_guest_state() -> Dictionary:
 func serialize_placements() -> Array:
 	var arr: Array = []
 	for pp in game._pending_placements:
-		(
-			arr
-			. append(
-				{
-					"pos": {"x": pp.pos.x, "y": pp.pos.y},
-					"letter": pp.letter,
-					"rack_index": pp.rack_index,
-				}
-			)
-		)
+		arr.append({
+			"pos": {"x": int(pp.pos.x), "y": int(pp.pos.y)},
+			"letter": String(pp.letter),
+			"rack_index": int(pp.rack_index),
+		})
 	return arr
 
 
 func send_guest_action(action: Dictionary) -> void:
 	Net.send_action(action)
+	game._reset_turn_state()
 	game._state = game.GameState.WAITING
 	game._my_turn = false
 	game._update_display()
@@ -116,17 +112,26 @@ func _on_net_action(sender_id: int, action: Dictionary) -> void:
 				await WordDict.dictionary_ready
 			game._pending_placements = []
 			for t in action.get("tiles", []):
-				(
-					game
-					. _pending_placements
-					. append(
-						{
-							pos = Vector2i(int(t.pos.x), int(t.pos.y)),
-							letter = String(t.letter),
-							rack_index = int(t.rack_index),
-						}
-					)
-				)
+				if not (t is Dictionary):
+					continue
+				var pos_val = t.get("pos")
+				var px := 0
+				var py := 0
+				if pos_val is Dictionary:
+					px = int(pos_val.get("x", 0))
+					py = int(pos_val.get("y", 0))
+				elif pos_val is Vector2i:
+					px = pos_val.x
+					py = pos_val.y
+				elif pos_val is Vector2:
+					px = int(pos_val.x)
+					py = int(pos_val.y)
+
+				game._pending_placements.append({
+					pos = Vector2i(px, py),
+					letter = String(t.get("letter", "")),
+					rack_index = int(t.get("rack_index", 0)),
+				})
 			var result = game._validate_move()
 			if not result.valid:
 				print("[Net] Rejected guest move: ", result.reason)
