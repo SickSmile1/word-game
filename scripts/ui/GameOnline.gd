@@ -194,9 +194,7 @@ func apply_human_move(result: Dictionary) -> void:
 		game._human_rack.remove_letter(pp.letter)
 
 	game._human_score += score
-	game._pending_placements = []
-	game._placed_rack_indices = []
-	game._selected_rack_index = -1
+	game._reset_turn_state()
 	game._consecutive_passes = 0
 	var msg := '"%s" scores %d!' % [word, score]
 	print("[Net] Host applied host move: %s. Scores - Host: %d, Guest: %d" % [msg, game._human_score, game._ai_score])
@@ -227,6 +225,7 @@ func host_exchange(letters: String) -> void:
 	for c in letters:
 		game._human_rack.remove_letter(c)
 	game._human_rack.add_tiles(game._bag.exchange(letters))
+	game._reset_turn_state()
 	game._state = game.GameState.WAITING
 	game._my_turn = false
 	game._update_display()
@@ -244,9 +243,7 @@ func _apply_guest_move_online(result: Dictionary) -> void:
 		game._ai_rack.remove_letter(pp.letter)
 
 	game._ai_score += score
-	game._pending_placements = []
-	game._placed_rack_indices = []
-	game._selected_rack_index = -1
+	game._reset_turn_state()
 	game._consecutive_passes = 0
 	var msg := 'Opponent played "%s" for %d' % [word, score]
 	print("[Net] Host applied guest move: %s. Scores - Host: %d, Guest: %d" % [msg, game._human_score, game._ai_score])
