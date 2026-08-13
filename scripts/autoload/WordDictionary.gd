@@ -30,12 +30,14 @@ func _ready() -> void:
 func _load_on_thread(thread: Thread) -> void:
 	var file := FileAccess.open(WORDLIST_PATH, FileAccess.READ)
 	if file:
-		while not file.eof_reached():
-			var word := file.get_line().strip_edges().to_upper()
+		var text := file.get_as_text()
+		file.close()
+		var lines := text.split("\n")
+		for l in lines:
+			var word := l.strip_edges().to_upper()
 			if word.length() >= 2:
 				trie.insert(word)
 				word_count += 1
-		file.close()
 	else:
 		push_error("WordDictionary: could not open " + WORDLIST_PATH)
 		trie = null
@@ -46,36 +48,39 @@ func _finish_load(thread: Thread = null) -> void:
 	if thread:
 		thread.wait_to_finish()
 	is_ready = true
+	print("[WordDict] Loaded %d words into dictionary trie" % word_count)
 	dictionary_ready.emit()
 
 
 # The single-threaded web export cannot run Threads, so load the word list on
-# the main thread in flat time-sliced chunks to keep the UI responsive without
-# building up a recursive coroutine call stack.
+# the main thread using fast bulk text splitting and time-sliced batch chunks.
 func _load_chunked() -> void:
-	_chunk_file = FileAccess.open(WORDLIST_PATH, FileAccess.READ)
-	if not _chunk_file:
+	var file := FileAccess.open(WORDLIST_PATH, FileAccess.READ)
+	if not file:
 		push_error("WordDictionary: could not open " + WORDLIST_PATH)
 		trie = null
 		_finish_load()
 		return
 
-	while not _chunk_file.eof_reached():
+	var text := file.get_as_text()
+	file.close()
+
+	var lines := text.split("\n")
+	var total := lines.size()
+	var idx := 0
+
+	while idx < total:
 		var start := Time.get_ticks_msec()
-		var lines_in_chunk := 0
-		while not _chunk_file.eof_reached():
-			var word := _chunk_file.get_line().strip_edges().to_upper()
+		var end_idx := min(idx + 5000, total)
+		for i in range(idx, end_idx):
+			var word := lines[i].strip_edges().to_upper()
 			if word.length() >= 2:
 				trie.insert(word)
 				word_count += 1
-			lines_in_chunk += 1
-			if lines_in_chunk % 500 == 0:
-				if Time.get_ticks_msec() - start > MAX_CHUNK_MS:
-					break
-		if not _chunk_file.eof_reached():
+		idx = end_idx
+		if idx < total and Time.get_ticks_msec() - start > MAX_CHUNK_MS:
 			await get_tree().process_frame
 
-	_chunk_file.close()
 	_finish_load()
 
 
