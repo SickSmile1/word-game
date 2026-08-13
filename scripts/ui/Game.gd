@@ -94,7 +94,7 @@ func _setup_signals():
 	medium_button.pressed.connect(func(): _on_difficulty_selected(AIPlayer.Difficulty.MEDIUM))
 	hard_button.pressed.connect(func(): _on_difficulty_selected(AIPlayer.Difficulty.HARD))
 	board_display.cell_clicked.connect(_on_board_cell_clicked)
-	board_display.tile_drag_dropped.connect(_on_board_cell_clicked)
+	board_display.tile_drag_dropped.connect(_on_board_tile_dropped)
 	rack_display.tile_selected.connect(_on_rack_tile_selected)
 	rack_display.tile_deselected.connect(_on_rack_tile_deselected)
 	rack_display.placed_tile_clicked.connect(_on_placed_tile_clicked)
@@ -450,6 +450,34 @@ func _on_board_cell_clicked(row: int, col: int):
 	_update_display()
 
 
+func _on_board_tile_dropped(row: int, col: int, rack_index: int) -> void:
+	if _state != GameState.HUMAN_TURN or not _my_turn:
+		return
+	if _exchange_mode:
+		return
+	if _board.is_occupied(row, col):
+		return
+	if _get_pending_idx(row, col) >= 0:
+		return
+	if _placed_rack_indices.has(rack_index):
+		return
+
+	var rack_str := _human_rack.get_tiles()
+	if rack_index < 0 or rack_index >= rack_str.length():
+		return
+
+	_pending_placements.append({
+		pos = Vector2i(row, col),
+		letter = rack_str[rack_index],
+		rack_index = rack_index,
+	})
+	_placed_rack_indices.append(rack_index)
+	_selected_rack_index = -1
+	_preview_dirty = true
+	rack_display.clear_selection()
+	_update_display()
+
+
 func _on_rack_tile_selected(index: int):
 	if _state != GameState.HUMAN_TURN or not _my_turn:
 		return
@@ -612,10 +640,13 @@ func _validate_move() -> Dictionary:
 		rows[p.x] = true
 		cols[p.y] = true
 
+	print("[Validate] Pending tiles count: %d, positions: %s" % [tiles.size(), positions])
+
 	var horizontal := rows.size() == 1
 	var vertical := cols.size() == 1
 
 	if not horizontal and not vertical:
+		print("[Validate] Failed single row/col check. distinct rows: %s, distinct cols: %s" % [rows.keys(), cols.keys()])
 		return {valid = false, reason = "Tiles must be in a single row or column"}
 
 	if positions.size() == 1:
@@ -675,6 +706,7 @@ func _validate_move() -> Dictionary:
 				start_row -= 1
 
 		var main_word = temp.get_existing_word(start_row, start_col, horizontal)
+		print("[Validate] Formed main word: \"%s\" (length %d)" % [main_word.word, main_word.word.length()])
 		if main_word.word.length() < 2:
 			fail_reason = "Word must be at least 2 letters long"
 		elif not _is_word_valid(main_word.word):
@@ -695,6 +727,7 @@ func _validate_move() -> Dictionary:
 					temp, main_word.word, main_word.row, main_word.col, horizontal, tiles_placed_arr
 				)
 
+				print("[Validate] Move ACCEPTED: \"%s\" score=%d" % [main_word.word, score])
 				return {
 					valid = true,
 					word = main_word.word,
@@ -705,6 +738,7 @@ func _validate_move() -> Dictionary:
 					tiles_placed = tiles_placed_arr,
 				}
 
+	print("[Validate] Move REJECTED reason: ", fail_reason)
 	return {valid = false, reason = fail_reason}
 
 

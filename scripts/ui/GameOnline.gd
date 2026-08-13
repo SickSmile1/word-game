@@ -82,6 +82,8 @@ func serialize_placements() -> Array:
 	var arr: Array = []
 	for pp in game._pending_placements:
 		arr.append({
+			"row": int(pp.pos.x),
+			"col": int(pp.pos.y),
 			"pos": {"x": int(pp.pos.x), "y": int(pp.pos.y)},
 			"letter": String(pp.letter),
 			"rack_index": int(pp.rack_index),
@@ -120,18 +122,22 @@ func _on_net_action(sender_id: int, action: Dictionary) -> void:
 			for t in action.get("tiles", []):
 				if not (t is Dictionary):
 					continue
-				var pos_val = t.get("pos")
 				var px := 0
 				var py := 0
-				if pos_val is Dictionary:
-					px = int(pos_val.get("x", 0))
-					py = int(pos_val.get("y", 0))
-				elif pos_val is Vector2i:
-					px = pos_val.x
-					py = pos_val.y
-				elif pos_val is Vector2:
-					px = int(pos_val.x)
-					py = int(pos_val.y)
+				if t.has("row") and t.has("col"):
+					px = int(t.get("row", 0))
+					py = int(t.get("col", 0))
+				elif t.has("pos"):
+					var pos_val = t.get("pos")
+					if pos_val is Dictionary:
+						px = int(pos_val.get("x", 0))
+						py = int(pos_val.get("y", 0))
+					elif pos_val is Vector2i:
+						px = pos_val.x
+						py = pos_val.y
+					elif pos_val is Vector2:
+						px = int(pos_val.x)
+						py = int(pos_val.y)
 
 				game._pending_placements.append({
 					pos = Vector2i(px, py),
@@ -140,6 +146,7 @@ func _on_net_action(sender_id: int, action: Dictionary) -> void:
 				})
 			print("[Net] Host evaluating guest pending placements: ", game._pending_placements)
 			var result = game._validate_move()
+			print("[Net] Host move validation result: valid=%s, reason=\"%s\", word=\"%s\"" % [result.valid, result.get("reason", ""), result.get("word", "")])
 			if not result.valid:
 				print("[Net] Host move validation REJECTED guest move: ", result.reason)
 				var fail_msg: String = "Move rejected: " + String(result.reason)

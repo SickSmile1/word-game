@@ -2,7 +2,7 @@ class_name BoardDisplay
 extends Control
 
 signal cell_clicked(row: int, col: int)
-signal tile_drag_dropped(row: int, col: int)
+signal tile_drag_dropped(row: int, col: int, rack_index: int)
 
 const Board = preload("res://scripts/game/Board.gd")
 const Tiles = preload("res://scripts/game/Tiles.gd")
@@ -338,4 +338,5 @@ func _can_accept_drop(at_position: Vector2, data: Variant, row: int, col: int) -
 
 
 func _on_tile_dropped(at_position: Vector2, data: Variant, row: int, col: int) -> void:
-	tile_drag_dropped.emit(row, col)
+	var idx: int = int(data.get("index", -1)) if data is Dictionary else -1
+	tile_drag_dropped.emit(row, col, idx)
