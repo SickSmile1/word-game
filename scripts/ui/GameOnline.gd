@@ -90,6 +90,7 @@ func serialize_placements() -> Array:
 
 
 func send_guest_action(action: Dictionary) -> void:
+	print("[Net] Guest sending action to Host: ", action)
 	Net.send_action(action)
 	game._reset_turn_state()
 	game._state = game.GameState.WAITING
@@ -101,13 +102,18 @@ func _on_net_action(sender_id: int, action: Dictionary) -> void:
 	if not Net.is_host:
 		return
 	if sender_id != Net.remote_peer_id:
+		print("[Net] Host ignoring action from unknown sender %d (remote_peer_id=%d)" % [sender_id, Net.remote_peer_id])
 		return
 	if game._my_turn:
+		print("[Net] Host ignoring action because it is currently Host's turn")
 		return
+
+	print("[Net] Host received action from sender %d: %s" % [sender_id, action])
 
 	match action.get("type", ""):
 		"play":
 			if not WordDict.is_ready:
+				print("[Net] Host waiting for dictionary before validating guest move...")
 				game._set_status("Loading dictionary...")
 				await WordDict.dictionary_ready
 			game._pending_placements = []
@@ -132,15 +138,18 @@ func _on_net_action(sender_id: int, action: Dictionary) -> void:
 					letter = String(t.get("letter", "")),
 					rack_index = int(t.get("rack_index", 0)),
 				})
+			print("[Net] Host evaluating guest pending placements: ", game._pending_placements)
 			var result = game._validate_move()
 			if not result.valid:
-				print("[Net] Rejected guest move: ", result.reason)
+				print("[Net] Host move validation REJECTED guest move: ", result.reason)
 				var fail_msg: String = "Move rejected: " + String(result.reason)
 				game._set_status(fail_msg)
 				_broadcast(fail_msg)
 				return
+			print("[Net] Host move validation ACCEPTED guest move: word=\"%s\" score=%d orientation=%s tiles=%s" % [result.word, result.score, ("horizontal" if result.horizontal else "vertical"), result.tiles_placed])
 			_apply_guest_move_online(result)
 		"pass":
+			print("[Net] Host processing guest pass")
 			game._consecutive_passes += 1
 			game._reset_turn_state()
 			var msg := "Opponent passed"
@@ -152,6 +161,7 @@ func _on_net_action(sender_id: int, action: Dictionary) -> void:
 			_broadcast(msg)
 		"exchange":
 			var letters: String = action.get("letters", "")
+			print("[Net] Host processing guest exchange: %d letters" % letters.length())
 			for c in letters:
 				game._ai_rack.remove_letter(c)
 			game._ai_rack.add_tiles(game._bag.exchange(letters))
@@ -164,6 +174,7 @@ func _on_net_action(sender_id: int, action: Dictionary) -> void:
 			_check_end_game_online()
 			_broadcast(msg)
 		"rematch":
+			print("[Net] Host restarting game for rematch")
 			start_online_game()
 
 
@@ -181,6 +192,7 @@ func apply_human_move(result: Dictionary) -> void:
 	game._selected_rack_index = -1
 	game._consecutive_passes = 0
 	var msg := '"%s" scores %d!' % [word, score]
+	print("[Net] Host applied host move: %s. Scores - Host: %d, Guest: %d" % [msg, game._human_score, game._ai_score])
 	game._set_status(msg)
 	game._draw_human_tiles()
 	game._state = game.GameState.WAITING
@@ -191,6 +203,7 @@ func apply_human_move(result: Dictionary) -> void:
 
 
 func host_pass() -> void:
+	print("[Net] Host passed turn")
 	game._consecutive_passes += 1
 	game._reset_turn_state()
 	var msg := "You passed"
@@ -203,6 +216,7 @@ func host_pass() -> void:
 
 
 func host_exchange(letters: String) -> void:
+	print("[Net] Host exchanged %d tiles" % letters.length())
 	for c in letters:
 		game._human_rack.remove_letter(c)
 	game._human_rack.add_tiles(game._bag.exchange(letters))
@@ -228,6 +242,7 @@ func _apply_guest_move_online(result: Dictionary) -> void:
 	game._selected_rack_index = -1
 	game._consecutive_passes = 0
 	var msg := 'Opponent played "%s" for %d' % [word, score]
+	print("[Net] Host applied guest move: %s. Scores - Host: %d, Guest: %d" % [msg, game._human_score, game._ai_score])
 	game._set_status(msg)
 	game._draw_ai_tiles()
 	game._state = game.GameState.HUMAN_TURN
@@ -261,6 +276,7 @@ func _check_end_game_online() -> bool:
 
 
 func _end_game_online(reason: String) -> void:
+	print("[Net] Game over: ", reason)
 	game._state = game.GameState.GAME_OVER
 	game._set_status(reason)
 	game.submit_button.disabled = true
@@ -295,11 +311,14 @@ func _on_net_state(state: Dictionary) -> void:
 		game._set_status("Your turn" if game._my_turn else "Opponent's turn")
 	game._update_display()
 
+	print("[Net] Guest received state update: my_turn=%s, scores=[Host:%d, Guest:%d], last_action=\"%s\"" % [game._my_turn, s.scores[GameSession.Player.P0], s.scores[GameSession.Player.P1], s.last_action_text])
+
 	if s.game_over:
 		_end_game_online("Game over")
 
 
 func _on_net_disconnect() -> void:
+	print("[Net] Opponent disconnected!")
 	game._set_status("Opponent disconnected")
 	game.submit_button.disabled = true
 	game.pass_button.disabled = true
@@ -314,4 +333,5 @@ func _broadcast(msg: String = "") -> void:
 	var state_dict := _build_guest_state()
 	if not msg.is_empty():
 		state_dict["last_action"] = msg
+	print("[Net] Host broadcasting state: turn=%s, msg=\"%s\"" % [("Host" if game._my_turn else "Guest"), msg])
 	Net.send_state(state_dict)

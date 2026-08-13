@@ -618,8 +618,15 @@ func _validate_move() -> Dictionary:
 	if not horizontal and not vertical:
 		return {valid = false, reason = "Tiles must be in a single row or column"}
 
-	if horizontal and vertical and positions.size() == 1:
-		horizontal = true
+	if positions.size() == 1:
+		var test_temp: Board = _board.duplicate()
+		test_temp.place_tile(positions[0].x, positions[0].y, tiles[0].letter)
+		var h_len: int = test_temp.get_existing_word(positions[0].x, positions[0].y, true).word.length()
+		var v_len: int = test_temp.get_existing_word(positions[0].x, positions[0].y, false).word.length()
+		if v_len >= 2 and h_len < 2:
+			horizontal = false
+		else:
+			horizontal = true
 
 	var sorted = positions.duplicate()
 	var fail_reason := ""
